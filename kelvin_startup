@@ -1,0 +1,14 @@
+srun -p k2-epsrc -N 1 -n 1 --mem-per-cpu=1G --time=24:00:00 --pty bash
+module purge
+module load compilers/gcc/9.3.0
+module load mpi/openmpi/4.1.1/gcc-9.3.0
+module load libs/atlas/3.10.3/gcc-9.3.0
+module load apps/cmake/3.25.1/gcc-9.3.0
+module load apps/python3/3.10.5/gcc-9.3.0
+source /users/asmith/programs/kelvenv/bin/activate
+
+export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/users/asmith/programs/lammps/build/
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/users/asmith/programs/lammps/src/
+
+
