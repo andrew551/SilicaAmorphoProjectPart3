@@ -1,4 +1,6 @@
 from pathlib import Path
+import os
+
 _config = {
     'path_ACE_potential' : '/users/asmith/ACE',
     'path_lammps' : '/users/asmith/programs/lammps/build/lmp',
@@ -14,4 +16,10 @@ def config():
     for k, v in conf_copy.items():
         if isinstance(v, str) and '/users/' in v:
             conf_copy[k] = Path(v)
+
+    x = os.getenv('OMP_NUM_THREADS', '1')
+    conf_copy['OMP_NUM_THREADS'] = int(x) if x else 1
+    y = os.getenv('NTASKS', '1')
+    conf_copy['NTASKS'] = int(y) if y else 1
+    print(f'DEBUG: x, y = {x}, {y}')
     return conf_copy

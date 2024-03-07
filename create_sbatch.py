@@ -41,6 +41,7 @@ def run_lammps_sbatch(files_in, files_out, launch_name, ntasks, cpus_per_task, m
 	# TODO: understand this line 2
 	text += f'source {config["path_venv"]} \n\
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK \n\
+export NTASKS=$SLURM_NTASKS \n\
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:{config["path_lammps"]}\n\
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:{config["path_lammps_src"]}\n'
 
