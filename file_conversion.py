@@ -122,28 +122,59 @@ def write_LAMMPS_structure(structure, filename_lammps, supercell=(1, 1, 1), by_e
 
 '''
 x -> x_standardised
-this function standardises the files in the format found on https://github.com/WignerTransport/AmorFo/tree/master/SiO2_structures
+this function standardises the files in the format 
+(1) lammps format found on https://github.com/WignerTransport/AmorFo/tree/master/SiO2_structures
+or (2) standard vasp format
+in principle, you can chain as many other different format here as you need them...
 '''
 def regularize_lammps_file(file_in, file_out):
-    x = read(file_in, format = 'lammps-data', style='charge')
-    print(x)
-    atom_types = x.get_atomic_numbers()
-    print(atom_types)
-    # fix atomic numbers
-    counts = Counter(atom_types)
-    if counts[1] > counts[2]:
-        maptypes = {1 : 8, 2 : 14}
-    else:
-        maptypes = {2 : 8, 1 : 14}
-    new_types = [maptypes[_] for _ in atom_types]
-    x.set_atomic_numbers(new_types)
-    x = sort(x, tags=x.get_atomic_numbers())
-    write_LAMMPS_structure(x, file_out)
+    try:
+        x = read(file_in, format = 'lammps-data', style='charge')
+        print(x)
+        atom_types = x.get_atomic_numbers()
+        print(atom_types)
+        # fix atomic numbers
+        counts = Counter(atom_types)
+        if counts[1] > counts[2]:
+            maptypes = {1 : 8, 2 : 14}
+        else:
+            maptypes = {2 : 8, 1 : 14}
+        new_types = [maptypes[_] for _ in atom_types]
+        x.set_atomic_numbers(new_types)
+        x = sort(x, tags=x.get_atomic_numbers())
+        write_LAMMPS_structure(x, file_out)
+        print('read input file as lammps-data (style=charge)')
+        return
+    except Exception:
+        pass
+        #print("Couldn't read file as lammps-data-charge file type")
+    try:
+        x = read(file_in, format = 'vasp')
+        write_LAMMPS_structure(x, file_out)
+        print('read input file as vasp')
+        return
+    except Exception:
+        pass
+        #print("Couldn't read file as lammps-data-charge file type")  
+    try:
+        x = read(file_in, format = None)
+        write_LAMMPS_structure(x, file_out)
+        print('read input file using unknown type guess (note: the read may still be messed up - check the intermediate results)')
+        return
+    except Exception:
+        pass
+        #print("Couldn't read file as [unknown:guess] file type")
+
+
+    raise Exception("ERROR: none of methods tried could read input data")
 
 '''
 test conversion function
 '''
 if __name__ == '__main__':
-    input_struct_path = '/users/asmith/grun_in/models24k/Coords.dat'
-    output_struct_path = '/users/asmith/grun_in/models24k/Coords_fixed2'
+    #input_struct_path = '/users/asmith/grun_in/models24k/Coords.dat'
+    #output_struct_path = '/users/asmith/grun_in/models24k/Coords_fixed2'
+    input_struct_path = '/users/asmith/grun_in/model1536/POSCAR_1536'
+    output_struct_path = '/users/asmith/grun_in/model1536/Coords_reg'
+    print('Running file conversion test with in-file/out-file = {input_struct_path} {output_struct_path}')
     regularize_lammps_file(input_struct_path, output_struct_path)
