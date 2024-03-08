@@ -18,8 +18,11 @@ def prepare_output_folder(config):
 
 if __name__ == '__main__':
     config = makeconfig.config()
+    nproc = config['NTASKS']
+    if not config['OMP_NUM_THREADS'] == 1:
+        raise Exception(f"expected OMP_NUM_THEADS = 1, got {config['OMP_NUM_THEADS']}")
     print('config data=', config, flush=True)
-    input_struct_path = Path('/users/asmith/grun_in/models24k/Coords.dat')
+    input_struct_path = Path('/users/asmith/grun_in/models24k/Coords_2.dat')
     prepare_output_folder(config)
     regularised_input_path = config['output_dir'] / (input_struct_path.stem + '_regularised.dat')
     # convert the weird input format into normal lammps format
