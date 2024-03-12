@@ -1,0 +1,8 @@
+*.pyc
+*.out
+log.lammps
+temp
+*.POSCAR
+*.NL
+rap2sparse/Results/*
+*.lammps
