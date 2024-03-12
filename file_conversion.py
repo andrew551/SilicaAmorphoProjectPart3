@@ -144,12 +144,13 @@ def fix_atomic_numbers(x):
     return x
 '''
 x -> x_standardised
-this function standardises the files in the format 
+this function reads the files in the format 
 (1) lammps format found on https://github.com/WignerTransport/AmorFo/tree/master/SiO2_structures
 or (2) standard vasp format
+or (3) lammps dump format
 in principle, you can chain as many other different format here as you need them...
 '''
-def read_any(file_in):
+def _read_any(file_in):
     if not os.path.isfile(file_in):
         raise Exception(f'ERROR file not found:"{file_in}"')
     try:
@@ -194,9 +195,9 @@ def read_any(file_in):
     raise Exception("ERROR: none of methods tried could read input data")
 
 def read_reg(file_in):
-    return fix_atomic_numbers(read_any(file_in))
+    return fix_atomic_numbers(_read_any(file_in))
 
-def regularize_lammps_file(file_in, file_out, out_type='lammps'):
+def convert_and_regularize_file(file_in, file_out, out_type='lammps'):
     x = read_reg(file_in)
     if out_type == 'lammps':
         write_LAMMPS_structure(x, file_out)
@@ -266,4 +267,4 @@ if __name__ == '__main__':
     input_struct_path = '/users/asmith/grun_out/relax_output/20240311184354/steps/final_conf.dump'
     output_struct_path = '/users/asmith/grun_in/model1536/Coords_regxx_2'
     print(f'Running file conversion test with in-file/out-file = {input_struct_path} {output_struct_path}')
-    regularize_lammps_file(input_struct_path, output_struct_path)
+    convert_and_regularize_file(input_struct_path, output_struct_path)

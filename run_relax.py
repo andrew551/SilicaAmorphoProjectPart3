@@ -38,11 +38,11 @@ if __name__ == '__main__':
     #thresholds = [1e-3, 1e-4, 1e-6, 1e-8, 1e-10, 1e-11,1e-12,1e-13,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-15,1e-15]
     #thresholds = [1e-10, 1e-11,1e-12,1e-13,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-15,1e-15]
 
-    number_relaxations = len(thresholds)*2
+    number_relaxations = len(thresholds)*2 + 1
 
-    if number_relaxations % 2 == 1:
-        raise Exception("number of relaxations must be even (to get non-vc constrained last relax)")
-    if (number_relaxations-1)//2 >= len(thresholds):
+    if number_relaxations % 2 == 0:
+        raise Exception("number of relaxations must be odd (to get non-vc constrained last relax)")
+    if (number_relaxations-2)//2 >= len(thresholds):
         raise Exception(f"not enough thresholds provided ({len(thresholds)}) for given number_relaxations ({number_relaxations})")
     meta_data = config.copy()
     meta_data['input_file'] = str(input_struct_path)
@@ -71,11 +71,11 @@ if __name__ == '__main__':
 
     initial_struct_atoms = file_conversion.read_reg(input_struct_path)
     num_atoms_in_primitive_cell = len(initial_struct_atoms.get_atomic_numbers())
-    file_conversion.regularize_lammps_file(input_struct_path, lammps_structure_file)
+    file_conversion.convert_and_regularize_file(input_struct_path, lammps_structure_file)
 
     
     temp_dump = config['output_dir'] / 'steps' / 'final_conf.dump'
-    for n_relax in range(1, number_relaxations+1):
+    for n_relax in range(1, number_relaxations):
         lammps_dump_file=config['output_dir'] / 'steps' / ('struct_%d_relax_%d.dump'%(number_structure,n_relax))
         lammps_ctrl_file=config['output_dir'] / 'steps' / ('struct_%d_relax_%d.lammps_ctrl'%(number_structure,n_relax))
         lammps_structure_file=config['output_dir'] / 'steps' / ('struct_%d_relax_%d.lammps_struct'%(number_structure, n_relax))
@@ -102,9 +102,9 @@ if __name__ == '__main__':
         print(cmd)
         os.system(cmd)
         input_structure_filename = "final_conf.dump"
-        file_conversion.regularize_lammps_file(temp_dump, next_lammps_structure_file)
+        file_conversion.convert_and_regularize_file(temp_dump, next_lammps_structure_file)
     #convert final one to vasp
-    file_conversion.regularize_lammps_file(next_lammps_structure_file, config['output_dir'] / 'relaxed_structure_starting_point.POSCAR', out_type='vasp')
+    file_conversion.convert_and_regularize_file(next_lammps_structure_file, config['output_dir'] / 'relaxed_structure_starting_point.POSCAR', out_type='vasp')
     t_end = datetime.datetime.now()
     print('end-time:', t_end)
     print('elapsed time:', (t_end-t_start))

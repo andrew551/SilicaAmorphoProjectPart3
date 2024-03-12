@@ -27,7 +27,7 @@ if __name__ == '__main__':
     prepare_output_folder(config)
     regularised_input_path = config['output_dir'] / (input_struct_path.stem + '_regularised.dat')
     # convert the weird input format into normal lammps format
-    file_conversion.regularize_lammps_file(input_struct_path, regularised_input_path)
+    file_conversion.convert_and_regularize_file(input_struct_path, regularised_input_path)
     # srun lammps anneal / relax
     command = create_anneal_ctrl.create_anneal_ctrl(regularised_input_path, config)
     print(command, flush=True)
