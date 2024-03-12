@@ -35,17 +35,17 @@ thermo_style    custom  step density temp press ke pe etotal\n\
 #######################################################\n\
  \n\
 fix             F1 all npt temp 1.0 1500.0 0.01 iso 0.0 0.0 10.0\n\
-run             10000\n\
+run             20000\n\
 unfix           F1\n\
 write_data      {output_dir/"1_heated.dat"}\n\
  \n\
 fix             F2 all npt temp 1500.0 1500.0 0.01 iso 0.0 0.0 5.0\n\
-run             50000\n\
+run             100000\n\
 unfix           F2\n\
 write_data      {output_dir/"2_equilibrated.dat"}\n\
  \n\
 fix             F5 all npt temp 1500.0 1.0 0.01 iso 0.0 0.0 5.0\n\
-run             150000\n\
+run             300000\n\
 unfix           F5\n\
 write_data      {output_dir/"3_results.dat"}\n\
  \n\

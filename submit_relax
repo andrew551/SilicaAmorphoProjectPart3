@@ -1,11 +1,11 @@
 #!/bin/bash --login
 #SBATCH --nodes=1
-#SBATCH --ntasks=60
+#SBATCH --ntasks=10
 #SBATCH --time=48:00:00
 #SBATCH --mail-type=NONE
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=2G
-#SBATCH --partition=k2-epsrc
+#SBATCH --partition=k2-epsrc-himem
 module purge;
 module load compilers/gcc/9.3.0;
 module load mpi/openmpi/4.1.1/gcc-9.3.0;
@@ -17,4 +17,4 @@ export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 export NTASKS=$SLURM_NTASKS 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/mnt/userapps/q13camb_apps/lammps/build/
 echo $LD_LIBRARY_PATH
-python3 run_anneal.py > anneal_work.out
+python3 run_relax.py > relax_work.out

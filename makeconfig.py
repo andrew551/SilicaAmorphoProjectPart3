@@ -2,12 +2,11 @@ from pathlib import Path
 import os
 
 _config = {
-    'path_ACE_potential' : '/users/asmith/ACE',
-    'path_lammps' : '/users/asmith/programs/lammps/build/lmp',
+    'path_ACE_potential' : '/mnt/scratch2/q13camb_scratch/POTENTIALS/sio2/ACE/',
+    'path_lammps' : '/mnt/userapps/q13camb_apps/lammps/build/lmp',
     'material' : 'SiO2',
-    #'output_dir_base' : '/users/asmith/grun_out',
-    'output_dir_base' : '/mnt/scratch2/q13camb_scratch/adps2/output_folder1',
-    'path_lammps_src': '/users/asmith/programs/lammps/src/',
+    'output_dir_base' : '/users/asmith/grun_out',
+    #'output_dir_base' : '/mnt/scratch2/q13camb_scratch/adps2/output_folder1',
     'path_venv': '/users/asmith/programs/kelvenv/bin/activate',
 }
 

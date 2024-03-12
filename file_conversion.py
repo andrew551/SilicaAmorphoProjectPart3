@@ -4,6 +4,8 @@ from collections import Counter
 import numpy as np
 from ase.build.tools import sort
 import makeconfig
+import traceback
+import os
 
 def get_cell_parameters(ASE_structure):
     cell = ASE_structure.get_cell()
@@ -121,60 +123,147 @@ def write_LAMMPS_structure(structure, filename_lammps, supercell=(1, 1, 1), by_e
     return
 
 '''
+fix the atomic numbers to be SiO2, and then sort by atomic number
+'''
+def fix_atomic_numbers(x):
+    atom_types = x.get_atomic_numbers()
+    #print(atom_types)
+    counts = Counter(atom_types)
+    numbers = list(counts.keys())
+    if not len(numbers) == 2:
+        raise Exception(f"ERROR: expected structure with 2 types of atom, got {list(numbers)}")
+    
+    # assign whichever atom type is more frequent to be oxygen, and the other Si
+    if counts[numbers[0]] > counts[numbers[1]]:
+        maptypes = {numbers[0] : 8, numbers[1] : 14}
+    else:
+        maptypes = {numbers[1] : 8, numbers[0] : 14}
+    new_types = [maptypes[_] for _ in atom_types]
+    x.set_atomic_numbers(new_types)
+    x = sort(x, tags=x.get_atomic_numbers())
+    return x
+'''
 x -> x_standardised
 this function standardises the files in the format 
 (1) lammps format found on https://github.com/WignerTransport/AmorFo/tree/master/SiO2_structures
 or (2) standard vasp format
 in principle, you can chain as many other different format here as you need them...
 '''
-def regularize_lammps_file(file_in, file_out):
+def read_any(file_in):
+    if not os.path.isfile(file_in):
+        raise Exception(f'ERROR file not found:"{file_in}"')
     try:
         x = read(file_in, format = 'lammps-data', style='charge')
-        print(x)
-        atom_types = x.get_atomic_numbers()
-        print(atom_types)
-        # fix atomic numbers
-        counts = Counter(atom_types)
-        if counts[1] > counts[2]:
-            maptypes = {1 : 8, 2 : 14}
-        else:
-            maptypes = {2 : 8, 1 : 14}
-        new_types = [maptypes[_] for _ in atom_types]
-        x.set_atomic_numbers(new_types)
-        x = sort(x, tags=x.get_atomic_numbers())
-        write_LAMMPS_structure(x, file_out)
         print('read input file as lammps-data (style=charge)')
-        return
+        return x
     except Exception:
         pass
         #print("Couldn't read file as lammps-data-charge file type")
     try:
         x = read(file_in, format = 'vasp')
-        write_LAMMPS_structure(x, file_out)
         print('read input file as vasp')
-        return
+        return x
     except Exception:
         pass
-        #print("Couldn't read file as lammps-data-charge file type")  
+        #print("Couldn't read file as lammps-data-charge file type")
+    try:
+        x = read(file_in, format = 'lammps-data', style='atomic')
+        print(x)
+        print('read input file as lammps-data (style=default)')
+        return x
+    except Exception as e:
+        pass
+        #print("Couldn't read file as lammps-datafile type")
+        #traceback.print_exception(e.__traceback__)
+    try:
+        x = read(file_in, format = 'lammps-dump-txt', style = 'atomic')
+        print(x)
+        print('read input file as lammps-dump-txt (style=atomic)')
+        return x
+    except Exception:
+        pass
+        #print("Couldn't read file as lammps-datafile type")
     try:
         x = read(file_in, format = None)
-        write_LAMMPS_structure(x, file_out)
-        print('read input file using unknown type guess (note: the read may still be messed up - check the intermediate results)')
-        return
+        print('read input file using unknown type guess')
+        return x
+    
     except Exception:
         pass
         #print("Couldn't read file as [unknown:guess] file type")
-
-
     raise Exception("ERROR: none of methods tried could read input data")
+
+def read_reg(file_in):
+    return fix_atomic_numbers(read_any(file_in))
+
+def regularize_lammps_file(file_in, file_out, out_type='lammps'):
+    x = read_reg(file_in)
+    if out_type == 'lammps':
+        write_LAMMPS_structure(x, file_out)
+    elif out_type == 'vasp':
+        write_VASP_structure(file_out, x)
+    else:
+        raise 
+    Exception(f'unsupported output type {out_type}')
+
+
+
+def write_VASP_structure(filename_POSCAR, structure, scaled=False, supercell=(1, 1, 1)):
+    cell = structure.get_cell()
+
+    types = structure.get_atomic_numbers()
+
+    atom_type_unique = np.unique(types, return_index=True)
+
+    # To use unique without sorting
+    sort_index = np.argsort(atom_type_unique[1])
+    elements_atomic_numbers = np.array(atom_type_unique[0])[sort_index]
+    elements_count = np.diff(np.append(np.array(atom_type_unique[1])[sort_index], [len(types)]))
+    elements_symbol = ''
+    chem_symbol = {}
+    chem_symbol[1] = 'H'
+    chem_symbol[8] = 'O'
+    chem_symbol[6] = 'C'
+    chem_symbol[14] = 'Si'
+    for atomic_number in elements_atomic_numbers:
+        elements_symbol += ' %s ' % (chem_symbol[atomic_number])
+
+    vasp_POSCAR = 'Generated using dynaphopy\n'
+    vasp_POSCAR += '1.0\n'
+    for row in cell:
+        vasp_POSCAR += '{0:20.10f} {1:20.10f} {2:20.10f}\n'.format(*row)
+    vasp_POSCAR += ' %s ' % (elements_symbol)
+    vasp_POSCAR += ' \n'
+    vasp_POSCAR += ' '.join([str(i) for i in elements_count])
+
+    if scaled:
+        scaled_positions = structure.get_scaled_positions()
+        vasp_POSCAR += '\nDirect\n'
+        for row in scaled_positions:
+            vasp_POSCAR += '{0:15.15f}   {1:15.15f}   {2:15.15f}\n'.format(*row)
+
+    else:
+        positions = structure.get_positions(supercell=supercell)
+        vasp_POSCAR += '\nCartesian\n'
+        for row in positions:
+            vasp_POSCAR += '{0:20.10f} {1:20.10f} {2:20.10f}\n'.format(*row)
+
+    tmpf = open(filename_POSCAR, 'w')
+    tmpf.write(vasp_POSCAR)
+    tmpf.close()
+    return
+
+
 
 '''
 test conversion function
 '''
 if __name__ == '__main__':
-    #input_struct_path = '/users/asmith/grun_in/models24k/Coords.dat'
+    input_struct_path = '/users/asmith/grun_in/models24k/Coords.dat'
+    input_struct_path = '/mnt/scratch2/q13camb_scratch/adps2/output_folder1/anneal_output/20240308185606/Coords_ACE_cg_min.dat'
     #output_struct_path = '/users/asmith/grun_in/models24k/Coords_fixed2'
-    input_struct_path = '/users/asmith/grun_in/model1536/POSCAR_1536'
-    output_struct_path = '/users/asmith/grun_in/model1536/Coords_reg'
-    print('Running file conversion test with in-file/out-file = {input_struct_path} {output_struct_path}')
+    #input_struct_path = '/users/asmith/grun_in/model1536/POSCAR_1536'
+    input_struct_path = '/users/asmith/grun_out/relax_output/20240311184354/steps/final_conf.dump'
+    output_struct_path = '/users/asmith/grun_in/model1536/Coords_regxx_2'
+    print(f'Running file conversion test with in-file/out-file = {input_struct_path} {output_struct_path}')
     regularize_lammps_file(input_struct_path, output_struct_path)
