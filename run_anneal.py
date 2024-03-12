@@ -35,7 +35,7 @@ if __name__ == '__main__':
     with open(lammps_ctrl, 'w') as f:
         f.write(command)
     lammps_out = str(config['output_dir'] / 'anneal1500K_silicaL.out')
-    anneal_command = create_sbatch.get_lammps_srun(lammps_ctrl, lammps_out, nproc)
+    anneal_command = f"srun -n {config['NTASKS']} {config['path_lammps']} -in {lammps_ctrl} > {lammps_out}"
     print(anneal_command, flush=True)
     meta_data = config.copy()
     meta_data['input_file'] = str(input_struct_path)
