@@ -254,12 +254,21 @@ def write_VASP_structure(filename_POSCAR, structure, scaled=False, supercell=(1,
     tmpf.close()
     return
 
-
-
+#x: ase atoms object
+def get_density(x):
+    v = x.get_volume()
+    num_ox = len([n for n in x.get_atomic_numbers() if n == 8])
+    num_si = len([n for n in x.get_atomic_numbers() if n == 14])
+    m = num_ox*16 + num_si*28.0855
+    return m/v/6.022e23*10e23
 '''
 test conversion function
 '''
 if __name__ == '__main__':
+    x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/output_folder_chik5001/relax_output/20240320212733/relaxed_structure_starting_point.POSCAR')
+    
+    print('density is', get_density(x))
+    '''
     input_struct_path = '/users/asmith/grun_in/models24k/Coords.dat'
     input_struct_path = '/mnt/scratch2/q13camb_scratch/adps2/output_folder1/anneal_output/20240308185606/Coords_ACE_cg_min.dat'
     #output_struct_path = '/users/asmith/grun_in/models24k/Coords_fixed2'
@@ -268,3 +277,4 @@ if __name__ == '__main__':
     output_struct_path = '/users/asmith/grun_in/model1536/Coords_regxx_2'
     print(f'Running file conversion test with in-file/out-file = {input_struct_path} {output_struct_path}')
     convert_and_regularize_file(input_struct_path, output_struct_path)
+    '''

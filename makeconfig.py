@@ -3,13 +3,15 @@ import os
 
 _config = {
     'path_ACE_potential' : '/mnt/scratch2/q13camb_scratch/POTENTIALS/sio2/ACE/',
+    #'path_ACE_potential' : '/mnt/scratch2/q13camb_scratch/adps2/ACE_POTENTIAL_SIOX/',
     'path_lammps' : '/mnt/userapps/q13camb_apps/lammps/build/lmp',
     'material' : 'SiO2',
-    'output_dir_base' : '/users/asmith/grun_out',
-    'output_dir_base' : '/mnt/scratch2/q13camb_scratch/adps2/output_folder1',
+    #'output_dir_base' : '/users/asmith/grun_out',
+    #'output_dir_base' : '/mnt/scratch2/q13camb_scratch/adps2/output_folder1',
+    'output_dir_base' : '/mnt/scratch2/q13camb_scratch/adps2/output_folder_chik5001',
     #'path_venv': '/users/asmith/programs/kelvenv/bin/activate',
     '[fc2]_FC2_cutoff':12, # FC2 cutoff for FC2
-    '[fc2]_Force_cutoff':12, # force cutoff for FC" (what's the difference?)
+    '[fc2]_Force_cutoff':12, # force cutoff for FC2 (what's the difference?)
 }
 
 def is_path_like(x):

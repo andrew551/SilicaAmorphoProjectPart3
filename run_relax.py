@@ -26,10 +26,8 @@ if __name__ == '__main__':
     if not config['OMP_NUM_THREADS'] == 1:
         raise Exception(f"expected OMP_NUM_THEADS = 1, got {config['OMP_NUM_THEADS']}")
     print('config data=', config, flush=True)
-    #input_struct_path = Path('/users/asmith/grun_in/models24k/Coords_3.dat')
-    #input_struct_path = Path('/users/asmith/grun_in/model1536/POSCAR_1536')
-    input_struct_path = Path('/users/asmith/grun_out/anneal_output/20240308155312/Coords_ACE_cg_min.dat') # 24k
-    
+    #input_struct_path = Path('/mnt/scratch2/q13camb_scratch/adps2/output_folder1/anneal_output/20240308155312/Coords_ACE_cg_min.dat') # 24k
+    input_struct_path = Path('/mnt/scratch2/q13camb_scratch/silica_plateau/chik5001/Coords_5001atoms_chik_min.dat')
     #input_struct_path = Path('/mnt/scratch2/q13camb_scratch/adps2/output_folder1/anneal_output/20240308185606/Coords_ACE_cg_min.dat') #1536
     prepare_output_folder(config)
 
@@ -59,7 +57,7 @@ if __name__ == '__main__':
     #  relaxation procedure
     #######################################################
 
-    # standardize POSCAR file and write to POSCAR_SYMMETRISED # skip this step (for glasses this is definately ok)
+    # standardize POSCAR file and write to POSCAR_SYMMETRISED # skip this step (for glasses this is definately ok as they don't have symmetry)
     #standardize_vasp_and_write_POSCAR(input_vasp_file)
 
     # convert to LAMMPS
@@ -95,21 +93,13 @@ if __name__ == '__main__':
 
         print('n_relax=', n_relax, ' type=%s' % (relax_type))
         next_lammps_structure_file=config['output_dir'] / 'steps' / ('struct_%d_relax_%d.lammps_struct'%(number_structure, n_relax+1))
-        #convert_lammps_dump_file(num_atoms_in_primitive_cell, lammps_dump_file, lammps_structure_file)
         cmd = f'tail -n {num_atoms_in_primitive_cell+9} {lammps_dump_file} > {temp_dump}'
-        #cmd = 'tail -n %d %s > final_conf.dump' % (
-        #num_atoms_in_primitive_cell+9, lammps_dump_file)
         print(cmd)
         os.system(cmd)
-        input_structure_filename = "final_conf.dump"
         file_conversion.convert_and_regularize_file(temp_dump, next_lammps_structure_file)
     #convert final one to vasp
     file_conversion.convert_and_regularize_file(next_lammps_structure_file, config['output_dir'] / 'relaxed_structure_starting_point.POSCAR', out_type='vasp')
     t_end = datetime.datetime.now()
     print('end-time:', t_end)
     print('elapsed time:', (t_end-t_start))
-    #
-    # standardize POSCAR using phonopy routines. We overwrite relaxed_structure_starting_point.POSCAR
-    #write_VASP_structure('relaxed_structure_starting_point.POSCAR', read('POSCAR_relaxed', format='vasp'))
-    #atoms_to_st=read_vasp('relaxed_structure_starting_point.POSCAR')
-    #write_vasp('relaxed_structure_starting_point.POSCAR', atoms_to_st)
+   

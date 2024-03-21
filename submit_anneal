@@ -5,7 +5,7 @@
 #SBATCH --mail-type=NONE
 #SBATCH --cpus-per-task=1
 #SBATCH --mem-per-cpu=2G
-#SBATCH --partition=k2-epsrc
+#SBATCH --partition=k2-epsrc-himem
 module purge;
 module load compilers/gcc/9.3.0;
 module load mpi/openmpi/4.1.1/gcc-9.3.0;
