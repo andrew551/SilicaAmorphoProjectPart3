@@ -266,7 +266,12 @@ test conversion function
 '''
 if __name__ == '__main__':
     x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/output_folder_chik5001/relax_output/20240320212733/relaxed_structure_starting_point.POSCAR')
-    
+    x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/output_folder_chik5001/relax_output/20240321211443/relaxed_structure_starting_point.POSCAR')
+    x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/output_folder_chik5001/relax_output/20240321211443/relaxed_structure_starting_point.POSCAR')
+    x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/output_folder_chik5001/relax_output/20240326012914/relaxed_structure_starting_point.POSCAR')
+    x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/output_folder_chik5001/relax_output/20240326012914/steps/struct_1_relax_1.lammps_struct')
+    x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/output_folder_chik5001/relax_output/20240329130444/relaxed_structure_starting_point.POSCAR')
+    x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/input_folder2/deringher5184/POSCAR_5184 1')
     print('density is', get_density(x))
     '''
     input_struct_path = '/users/asmith/grun_in/models24k/Coords.dat'

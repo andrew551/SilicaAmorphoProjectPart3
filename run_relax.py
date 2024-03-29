@@ -27,8 +27,12 @@ if __name__ == '__main__':
         raise Exception(f"expected OMP_NUM_THEADS = 1, got {config['OMP_NUM_THEADS']}")
     print('config data=', config, flush=True)
     #input_struct_path = Path('/mnt/scratch2/q13camb_scratch/adps2/output_folder1/anneal_output/20240308155312/Coords_ACE_cg_min.dat') # 24k
-    input_struct_path = Path('/mnt/scratch2/q13camb_scratch/silica_plateau/chik5001/Coords_5001atoms_chik_min.dat')
+    #input_struct_path = Path('/mnt/scratch2/q13camb_scratch/silica_plateau/chik5001/Coords_5001atoms_chik_min.dat')
+    #input_struct_path  = Path('/mnt/scratch2/q13camb_scratch/silica_plateau/chik5001_q10/Coords_5001atoms_chik_min1_4000q10.dat')
+    #input_struct_path = Path('/mnt/scratch2/q13camb_scratch/adps2/output_folder_chik5001/md_output/20240321184831/2_md300.dat')
     #input_struct_path = Path('/mnt/scratch2/q13camb_scratch/adps2/output_folder1/anneal_output/20240308185606/Coords_ACE_cg_min.dat') #1536
+    #input_struct_path = Path('/mnt/scratch2/q13camb_scratch/silica_plateau/chik5001_q10_5200K/Coords_5001atoms_chik_min_5200q10.dat')
+    input_struct_path  =Path('/mnt/scratch2/q13camb_scratch/adps2/input_folder2/deringher5184/POSCAR_5184 1')
     prepare_output_folder(config)
 
     # iteratively relax the structure
@@ -44,7 +48,9 @@ if __name__ == '__main__':
         raise Exception(f"not enough thresholds provided ({len(thresholds)}) for given number_relaxations ({number_relaxations})")
     meta_data = config.copy()
     meta_data['input_file'] = str(input_struct_path)
+    meta_data['initial_density'] = file_conversion.get_density(file_conversion.read_reg(input_struct_path))
     meta_data['jobtype'] = 'relax'
+    meta_data['keep_cuboidal'] = config['keep_cuboidal']
     meta_data['thresholds'] = thresholds
     meta_data['number_relaxations'] = number_relaxations
     for k, v in meta_data.items():
@@ -85,7 +91,7 @@ if __name__ == '__main__':
             relax_type = 'vc-relax'
 
         filename_ctrl = create_relax_ctrl.create_relax_ctrl(lammps_structure_file, lammps_dump_file, lammps_ctrl_file, config,
-                                            minimize=relax_type, threshold=thresholds[(n_relax - 1) // 2])
+                                            minimize=relax_type, threshold=thresholds[(n_relax - 1) // 2], keep_cuboidal=config['keep_cuboidal'])
         
         cmd = f"srun -n {config['NTASKS']} {config['path_lammps']} -in {filename_ctrl} > {lammps_out_file}" 
         print(cmd)
@@ -100,6 +106,11 @@ if __name__ == '__main__':
     #convert final one to vasp
     file_conversion.convert_and_regularize_file(next_lammps_structure_file, config['output_dir'] / 'relaxed_structure_starting_point.POSCAR', out_type='vasp')
     t_end = datetime.datetime.now()
+
+    meta_data['final_density (g/cm3)'] = file_conversion.get_density(file_conversion.read_reg(next_lammps_structure_file))
+    with open(config['output_dir'] / 'metadata.txt', 'w', encoding='utf-8') as fp:           
+        json.dump(meta_data, fp, indent=4)
+
     print('end-time:', t_end)
     print('elapsed time:', (t_end-t_start))
    

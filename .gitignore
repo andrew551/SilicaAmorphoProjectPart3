@@ -6,3 +6,5 @@ temp
 *.NL
 rap2sparse/Results/*
 *.lammps
+*.dat
+*.hdf5

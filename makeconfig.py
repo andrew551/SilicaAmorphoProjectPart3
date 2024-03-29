@@ -2,8 +2,9 @@ from pathlib import Path
 import os
 
 _config = {
-    'path_ACE_potential' : '/mnt/scratch2/q13camb_scratch/POTENTIALS/sio2/ACE/',
-    #'path_ACE_potential' : '/mnt/scratch2/q13camb_scratch/adps2/ACE_POTENTIAL_SIOX/',
+    'potential' : 'ACE_Deringher', # ACE_Deringher, or ACE_Chuck (or in future, GAP?)
+    'path_ACE_potential_Chuck' : '/mnt/scratch2/q13camb_scratch/POTENTIALS/sio2/ACE/',
+    'path_ACE_potential_Deringher' : '/mnt/scratch2/q13camb_scratch/adps2/ACE_POTENTIAL_SIOX/',
     'path_lammps' : '/mnt/userapps/q13camb_apps/lammps/build/lmp',
     'material' : 'SiO2',
     #'output_dir_base' : '/users/asmith/grun_out',
@@ -12,6 +13,7 @@ _config = {
     #'path_venv': '/users/asmith/programs/kelvenv/bin/activate',
     '[fc2]_FC2_cutoff':12, # FC2 cutoff for FC2
     '[fc2]_Force_cutoff':12, # force cutoff for FC2 (what's the difference?)
+    'keep_cubdoidal':True,
 }
 
 def is_path_like(x):
@@ -36,3 +38,17 @@ def config():
     conf_copy['NTASKS'] = int(y) if y else 1
     print(f'DEBUG: x, y = {x}, {y}')
     return conf_copy
+
+def get_potential_command(config):
+    if config['potential'] == 'ACE_Deringher':
+        return f'pair_style  pace\n\
+pair_coeff  * * {config["path_ACE_potential_Deringher"]}/SiOx_potential.yace O Si\n'
+    elif config['potential'] == 'ACE_Chuck':
+        return f'pair_style      hybrid/overlay pace table spline 6000\n\
+pair_coeff      * * pace {config["path_ACE_potential_Chuck"]}/SiO2-4_24-20-16-12.yace O Si\n\
+pair_coeff      1 1 table {config["path_ACE_potential_Chuck"]}/SiO2-4_24-20-16-12_pairpot.table O_O \n\
+pair_coeff      1 2 table {config["path_ACE_potential_Chuck"]}/SiO2-4_24-20-16-12_pairpot.table O_Si\n\
+pair_coeff      2 2 table {config["path_ACE_potential_Chuck"]}/SiO2-4_24-20-16-12_pairpot.table Si_Si\n'
+    else:
+        raise Exception(f"invalid potential name {config['potential']}")
+

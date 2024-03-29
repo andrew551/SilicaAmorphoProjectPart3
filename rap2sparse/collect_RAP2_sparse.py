@@ -25,11 +25,10 @@ for i in range(n_files):
         data.append(f["fc2"][()])
         inds.append(f["indices"][()])
         rank=f["rank"][()]
-    print("File read for rank ",rank)
+    print("File read for rank ",rank, data[-1].shape, inds[-1].shape, inds[-1])
     sys.stdout.flush()
-
 fc2=np.vstack(data)
-inds=np.vstack(inds)
+inds=np.concatenate(inds) # vstack -> concatenate bug fix
 del data
 
 print("Read indices are:\n",inds)
