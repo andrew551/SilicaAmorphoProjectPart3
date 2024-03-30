@@ -2,7 +2,7 @@ from pathlib import Path
 import os
 
 _config = {
-    'potential' : 'ACE_Deringher', # ACE_Deringher, or ACE_Chuck (or in future, GAP?)
+    'potential' : 'ACE_Chuck', # ACE_Deringher, or ACE_Chuck (or in future, GAP?)
     'path_ACE_potential_Chuck' : '/mnt/scratch2/q13camb_scratch/POTENTIALS/sio2/ACE/',
     'path_ACE_potential_Deringher' : '/mnt/scratch2/q13camb_scratch/adps2/ACE_POTENTIAL_SIOX/',
     'path_lammps' : '/mnt/userapps/q13camb_apps/lammps/build/lmp',
@@ -13,7 +13,7 @@ _config = {
     #'path_venv': '/users/asmith/programs/kelvenv/bin/activate',
     '[fc2]_FC2_cutoff':12, # FC2 cutoff for FC2
     '[fc2]_Force_cutoff':12, # force cutoff for FC2 (what's the difference?)
-    'keep_cubdoidal':True,
+    'keep_cuboidal':True,
 }
 
 def is_path_like(x):

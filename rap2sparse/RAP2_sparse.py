@@ -46,6 +46,8 @@ CHECKPOINT=0
 atom_dict={'O':1, 'Si':2}
 
 if potential=='ACE':
+    cmds = makeconfig.get_potential_command(config).split('\n')
+    '''
     path_ACE_potential = config['path_ACE_potential']
     cmds = [    'pair_style hybrid/overlay pace table spline 6000',
                 'pair_coeff * * pace %s/SiO2-4_24-20-16-12.yace O Si'%path_ACE_potential,
@@ -53,7 +55,9 @@ if potential=='ACE':
                 'pair_coeff 1 2 table %s/SiO2-4_24-20-16-12_pairpot.table O_Si'%path_ACE_potential,
                 'pair_coeff 2 2 table %s/SiO2-4_24-20-16-12_pairpot.table Si_Si'%path_ACE_potential
     ]
+    '''
 if potential=='GAP':
+    raise Exception("unimplemented GAP!")
     path_GAP_potential = '/work/e89/e89/bp443/GAP'
     cmds = [	'pair_style quip',
 	            'pair_coeff * * %s/sio2_potential_data/potential/silica_gap.xml "Potential xml_label=GAP_2021_4_19_120_7_32_55_336" 8 14'%(path_GAP_potential)]
