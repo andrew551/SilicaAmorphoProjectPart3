@@ -1,0 +1,5 @@
+MAIN                    #  possible values IS or MAIN
+'/mnt/scratch2/q13camb_scratch/silica_plateau/chik5001_q10_4000K/Coords_5001atoms_chik_min1_4000q10.dat'     #  path to file with the structural model  
+'/mnt/scratch2/q13camb_scratch/silica_plateau/chik5001_q10_4000K/frequencies_4000q10.dat'        #  path to file with eigenvalues
+'/mnt/scratch2/q13camb_scratch/silica_plateau/chik5001_q10_4000K/eigenmodes_4000q10.bin'         #  path to file with eigenvectors
+'/mnt/scratch2/q13camb_scratch/silica_plateau/chik5001_q10_4000K/'           #  path to files with  elements of FC3
