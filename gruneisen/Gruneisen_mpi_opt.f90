@@ -19,7 +19,7 @@
       
       real*8, allocatable :: eigen(:),mass(:),rr(:),ww(:),gamma1(:),allgamma(:),nj(:),CV(:)
  
-      character*100 path_model,path_w,path_eigen,path_fc3,isrmean
+      character*100 path_model,path_w,path_eigen,path_fc3,isrmean,ch
  
       m_rank=0
       m_size=1
@@ -71,10 +71,14 @@
       do i=1,itp
         read(45,*)j,mm(i)
       enddo
-       
-      do i=1,8
-        read(45,*)
+      ch=''
+      do while(trim(ch) /= 'Atoms')
+        read(45,*)ch
       enddo
+      read(45,*) 
+      !do i=1,8
+      !  read(45,*)
+      !enddo
       do i=1,natom
         read(45,*)j,typ,qq,r(:)
         rr(j*3-2:j*3)=r(:)

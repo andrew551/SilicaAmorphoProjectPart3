@@ -32,7 +32,8 @@ if __name__ == '__main__':
     #input_struct_path = Path('/mnt/scratch2/q13camb_scratch/adps2/output_folder_chik5001/md_output/20240321184831/2_md300.dat')
     #input_struct_path = Path('/mnt/scratch2/q13camb_scratch/adps2/output_folder1/anneal_output/20240308185606/Coords_ACE_cg_min.dat') #1536
     #input_struct_path = Path('/mnt/scratch2/q13camb_scratch/silica_plateau/chik5001_q10_5200K/Coords_5001atoms_chik_min_5200q10.dat')
-    input_struct_path  =Path('/mnt/scratch2/q13camb_scratch/adps2/input_folder2/deringher5184/POSCAR_5184 1')
+    #input_struct_path  =Path('/mnt/scratch2/q13camb_scratch/adps2/input_folder2/deringher5184/POSCAR_5184 1')
+    input_struct_path = Path('/mnt/scratch2/q13camb_scratch/adps2/quenched6000K/initial_model/Coords_5001atoms_chik_min_q11_6000K.dat')
     prepare_output_folder(config)
 
     # iteratively relax the structure

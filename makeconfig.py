@@ -9,11 +9,13 @@ _config = {
     'material' : 'SiO2',
     #'output_dir_base' : '/users/asmith/grun_out',
     #'output_dir_base' : '/mnt/scratch2/q13camb_scratch/adps2/output_folder1',
-    'output_dir_base' : '/mnt/scratch2/q13camb_scratch/adps2/output_folder_chik5001',
+    #'output_dir_base' : '/mnt/scratch2/q13camb_scratch/adps2/output_folder_chik5001',
+    'output_dir_base': '/mnt/scratch2/q13camb_scratch/adps2/quenched6000K/1_relax',
     #'path_venv': '/users/asmith/programs/kelvenv/bin/activate',
     '[fc2]_FC2_cutoff':12, # FC2 cutoff for FC2
     '[fc2]_Force_cutoff':12, # force cutoff for FC2 (what's the difference?)
     'keep_cuboidal':True,
+    '[fc3_batch]n_batches': 6,
 }
 
 def is_path_like(x):
@@ -36,7 +38,8 @@ def config():
     conf_copy['OMP_NUM_THREADS'] = int(x) if x else 1
     y = os.getenv('NTASKS', '1')
     conf_copy['NTASKS'] = int(y) if y else 1
-    print(f'DEBUG: x, y = {x}, {y}')
+    conf_copy['AMORPHO_PATH'] = os.getenv('AMORPHO_PATH', '')
+    #print(f'DEBUG: x, y = {x}, {y}')
     return conf_copy
 
 def get_potential_command(config):
@@ -49,6 +52,10 @@ pair_coeff      * * pace {config["path_ACE_potential_Chuck"]}/SiO2-4_24-20-16-12
 pair_coeff      1 1 table {config["path_ACE_potential_Chuck"]}/SiO2-4_24-20-16-12_pairpot.table O_O \n\
 pair_coeff      1 2 table {config["path_ACE_potential_Chuck"]}/SiO2-4_24-20-16-12_pairpot.table O_Si\n\
 pair_coeff      2 2 table {config["path_ACE_potential_Chuck"]}/SiO2-4_24-20-16-12_pairpot.table Si_Si\n'
+    elif config['potential'] == 'GAP_Si':
+        return f'pair_style quip\n\
+pair_coeff * * {config['path_GAP_Si_xml']} "Potential xml_label={config['path_GAP_Si_label']}"\n'
+
     else:
         raise Exception(f"invalid potential name {config['potential']}")
 

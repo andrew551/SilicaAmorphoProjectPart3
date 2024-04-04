@@ -17,7 +17,7 @@ def get_cell_parameters(ASE_structure):
     beta = np.arccos(np.dot(cell[2], cell[0]) / (a * c))
     return a, b, c, alpha, beta, gamma
 
-def write_LAMMPS_structure(structure, filename_lammps, supercell=(1, 1, 1), by_element=True):
+def write_LAMMPS_structure(structure, filename_lammps, style=None, supercell=(1, 1, 1), by_element=True):
     types = structure.get_atomic_numbers()
 
     atom_type_unique = np.unique(types, return_index=True)
@@ -113,9 +113,17 @@ def write_LAMMPS_structure(structure, filename_lammps, supercell=(1, 1, 1), by_e
     #        lammps_data_file += '{0} {1} {2} {3:20.10f} {4:20.10f} {5:20.10f}\n'.format(i + 1, atom_index[i] + 1,
     #                                                                                    charges[i], row[0], row[1], row[2])
     # else:
-    for i, row in enumerate(positions):
-        lammps_data_file += '{0} {1} {2:20.10f} {3:20.10f} {4:20.10f}\n'.format(i + 1, atom_index[i] + 1, row[0],
-                                                                                row[1], row[2])
+    if style == None:
+        for i, row in enumerate(positions):
+            lammps_data_file += '{0} {1} {2:20.10f} {3:20.10f} {4:20.10f}\n'.format(i + 1, atom_index[i] + 1, row[0],
+                                                                                    row[1], row[2])
+    elif style == 'charge-dummy':
+        dummy = 0.12345
+        for i, row in enumerate(positions):
+            lammps_data_file += '{0} {1} {2:20.10f} {3:20.10f} {4:20.10f} {5:20.10f}\n'.format(i + 1, atom_index[i] + 1, dummy, row[0],
+                                                                                    row[1], row[2])
+    else:
+        raise Exception(f"unimplemented style {style}!")
 
     tmpf = open(filename_lammps, 'w')
     tmpf.write(lammps_data_file)
@@ -197,12 +205,14 @@ def _read_any(file_in):
 def read_reg(file_in):
     return fix_atomic_numbers(_read_any(file_in))
 
-def convert_and_regularize_file(file_in, file_out, out_type='lammps'):
+def convert_and_regularize_file(file_in, file_out, out_type='lammps', style=None):
     x = read_reg(file_in)
     if out_type == 'lammps':
-        write_LAMMPS_structure(x, file_out)
+        write_LAMMPS_structure(x, file_out, style=style)
     elif out_type == 'vasp':
         write_VASP_structure(file_out, x)
+    elif out_type == 'xyz':
+        write(file_out, x, format='xyz')
     else:
         raise 
     Exception(f'unsupported output type {out_type}')
@@ -272,6 +282,7 @@ if __name__ == '__main__':
     x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/output_folder_chik5001/relax_output/20240326012914/steps/struct_1_relax_1.lammps_struct')
     x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/output_folder_chik5001/relax_output/20240329130444/relaxed_structure_starting_point.POSCAR')
     x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/input_folder2/deringher5184/POSCAR_5184 1')
+    x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/quenched6000K/1_relax/relax_output/20240403181127/steps/struct_1_relax_8.lammps_struct')
     print('density is', get_density(x))
     '''
     input_struct_path = '/users/asmith/grun_in/models24k/Coords.dat'
