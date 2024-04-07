@@ -8,7 +8,7 @@ from ase.io.vasp import read_vasp
 
 
 # input 
-primitive_filename       = "relaxed_structure_starting_point.POSCAR"
+primitive_filename       = "POSCAR"
 
 input_filename= 'fc2.hdf5'
 

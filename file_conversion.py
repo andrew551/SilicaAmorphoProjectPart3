@@ -6,6 +6,7 @@ from ase.build.tools import sort
 import makeconfig
 import traceback
 import os
+config = makeconfig.config()
 
 def get_cell_parameters(ASE_structure):
     cell = ASE_structure.get_cell()
@@ -131,21 +132,29 @@ def write_LAMMPS_structure(structure, filename_lammps, style=None, supercell=(1,
     return
 
 '''
-fix the atomic numbers to be SiO2, and then sort by atomic number
+fix the atomic numbers to be chemically correct for the material (guess using stoichometry)
 '''
 def fix_atomic_numbers(x):
     atom_types = x.get_atomic_numbers()
     #print(atom_types)
     counts = Counter(atom_types)
     numbers = list(counts.keys())
-    if not len(numbers) == 2:
-        raise Exception(f"ERROR: expected structure with 2 types of atom, got {list(numbers)}")
-    
-    # assign whichever atom type is more frequent to be oxygen, and the other Si
-    if counts[numbers[0]] > counts[numbers[1]]:
-        maptypes = {numbers[0] : 8, numbers[1] : 14}
+    if config['material'] == 'SiO2':
+        if not len(numbers) == 2:
+            raise Exception(f"ERROR: expected structure with 2 types of atom, got {list(numbers)}")
+        
+        # assign whichever atom type is more frequent to be oxygen, and the other Si
+        if counts[numbers[0]] > counts[numbers[1]]:
+            maptypes = {numbers[0] : 8, numbers[1] : 14}
+        else:
+            maptypes = {numbers[1] : 8, numbers[0] : 14}
+    elif config['material'] == 'Si':
+        if not len(numbers) == 1:
+            raise Exception(f"ERROR: expected structure with 1 types of atom, got {list(numbers)}") 
+        # assign all atoms as Si
+        maptypes = {numbers[0] : 14}
     else:
-        maptypes = {numbers[1] : 8, numbers[0] : 14}
+        raise Exception(f"unsupported matieral: {config['material']}")    
     new_types = [maptypes[_] for _ in atom_types]
     x.set_atomic_numbers(new_types)
     x = sort(x, tags=x.get_atomic_numbers())
@@ -270,7 +279,7 @@ def get_density(x):
     num_ox = len([n for n in x.get_atomic_numbers() if n == 8])
     num_si = len([n for n in x.get_atomic_numbers() if n == 14])
     m = num_ox*16 + num_si*28.0855
-    return m/v/6.022e23*10e23
+    return m/v/6.022e23*10e23 # Avogadros constant
 '''
 test conversion function
 '''

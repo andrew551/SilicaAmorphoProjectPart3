@@ -3,12 +3,16 @@ from ase.neighborlist import NeighborList, NewPrimitiveNeighborList
 from ase.io.vasp import read_vasp
 import pickle
 import numpy as np
-
+import sys
+import os
+sys.path.insert(1, os.path.join(sys.path[0], '..')) # "hack" to add the parent directory to path
+import makeconfig # this line needs to be after the sys.path.insert line
+config = makeconfig.config()
 
 POSCAR_file='POSCAR'
 output_ext='.NLC'
-FC3_cutoff = 5
-Force_cutoff=12
+Force_cutoff = config["[4_fc3]force_cutoff"]
+FC3_cutoff = config["[4_fc3]fc3_cutoff"]
 
 output_file=POSCAR_file+str(FC3_cutoff)+str(Force_cutoff)+output_ext
 print(output_file)

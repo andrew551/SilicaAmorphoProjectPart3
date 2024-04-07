@@ -2,8 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #filename = 'frequencies_elpa_new.dat'
-filename = '/mnt/scratch2/q13camb_scratch/adps2/output_folder_chik5001/pydiag_output/20240330232833/eigenvalues.dat'
-
+#filename = '/mnt/scratch2/q13camb_scratch/adps2/output_folder_chik5001/pydiag_output/20240330232833/eigenvalues.dat'
+filename = 'eigenvalues.dat'
 '''
 with open(filename) as f:
     data = np.array([list(map(float, line.split())) for line in f])

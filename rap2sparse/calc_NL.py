@@ -8,7 +8,7 @@ sys.path.insert(1, os.path.join(sys.path[0], '..')) # "hack" to add the parent d
 import makeconfig # this line needs to be after the sys.path.insert line
 config = makeconfig.config()
 
-POSCAR_file='relaxed_structure_starting_point.POSCAR'
+POSCAR_file='POSCAR'
 output_ext='.NL'
 FC2_cutoff = config['[fc2]_FC2_cutoff'] #used to be 6
 Force_cutoff = config['[fc2]_Force_cutoff']

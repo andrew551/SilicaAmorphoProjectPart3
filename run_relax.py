@@ -25,6 +25,11 @@ if __name__ == '__main__':
     nproc = config['NTASKS']
     if not config['OMP_NUM_THREADS'] == 1:
         raise Exception(f"expected OMP_NUM_THEADS = 1, got {config['OMP_NUM_THEADS']}")
+    config['output_dir'] = Path('1_relax').resolve()
+    if config['need_anneal?']:
+        input_struct_path = Path('0_anneal/Coords_ACE_cg_min.dat').resolve()
+    else:
+        input_struct_path = config['input_struct']
     print('config data=', config, flush=True)
     #input_struct_path = Path('/mnt/scratch2/q13camb_scratch/adps2/output_folder1/anneal_output/20240308155312/Coords_ACE_cg_min.dat') # 24k
     #input_struct_path = Path('/mnt/scratch2/q13camb_scratch/silica_plateau/chik5001/Coords_5001atoms_chik_min.dat')
@@ -33,14 +38,14 @@ if __name__ == '__main__':
     #input_struct_path = Path('/mnt/scratch2/q13camb_scratch/adps2/output_folder1/anneal_output/20240308185606/Coords_ACE_cg_min.dat') #1536
     #input_struct_path = Path('/mnt/scratch2/q13camb_scratch/silica_plateau/chik5001_q10_5200K/Coords_5001atoms_chik_min_5200q10.dat')
     #input_struct_path  =Path('/mnt/scratch2/q13camb_scratch/adps2/input_folder2/deringher5184/POSCAR_5184 1')
-    input_struct_path = Path('/mnt/scratch2/q13camb_scratch/adps2/quenched6000K/initial_model/Coords_5001atoms_chik_min_q11_6000K.dat')
-    prepare_output_folder(config)
+    #input_struct_path = Path('/mnt/scratch2/q13camb_scratch/adps2/quenched6000K/initial_model/Coords_5001atoms_chik_min_q11_6000K.dat')
+    #prepare_output_folder(config)
 
     # iteratively relax the structure
-    thresholds = [1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8,1e-9,1e-10,1e-11,1e-12,1e-12,1e-12,1e-13,1e-13,1e-13,1e-14,1e-14,1e-14,1e-15,1e-15, 8e-16, 5e-16, 3e-16, 1e-16]
+    #thresholds = [1e-3, 1e-4, 1e-5, 1e-6, 1e-7, 1e-8,1e-9,1e-10,1e-11,1e-12,1e-12,1e-12,1e-13,1e-13,1e-13,1e-14,1e-14,1e-14,1e-15,1e-15, 8e-16, 5e-16, 3e-16, 1e-16]
     #thresholds = [1e-3, 1e-4, 1e-6, 1e-8, 1e-10, 1e-11,1e-12,1e-13,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-15,1e-15]
     #thresholds = [1e-10, 1e-11,1e-12,1e-13,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-15,1e-15]
-
+    thresholds = [1e-9,1e-10,1e-11,1e-12,1e-12,1e-12,1e-13,1e-13,1e-13,1e-14,1e-14,1e-14,1e-15,1e-15, 8e-16, 5e-16, 3e-16, 1e-16]
     number_relaxations = len(thresholds)*2 + 1
 
     if number_relaxations % 2 == 0:
@@ -95,13 +100,13 @@ if __name__ == '__main__':
                                             minimize=relax_type, threshold=thresholds[(n_relax - 1) // 2], keep_cuboidal=config['keep_cuboidal'])
         
         cmd = f"srun -n {config['NTASKS']} {config['path_lammps']} -in {filename_ctrl} > {lammps_out_file}" 
-        print(cmd)
+        print(cmd, flush=True)
         os.system(cmd)
 
         print('n_relax=', n_relax, ' type=%s' % (relax_type))
         next_lammps_structure_file=config['output_dir'] / 'steps' / ('struct_%d_relax_%d.lammps_struct'%(number_structure, n_relax+1))
         cmd = f'tail -n {num_atoms_in_primitive_cell+9} {lammps_dump_file} > {temp_dump}'
-        print(cmd)
+        print(cmd, flush=True)
         os.system(cmd)
         file_conversion.convert_and_regularize_file(temp_dump, next_lammps_structure_file)
     #convert final one to vasp

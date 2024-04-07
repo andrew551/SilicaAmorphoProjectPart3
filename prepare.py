@@ -6,7 +6,7 @@ from pathlib import Path
 import shutil
 
 if __name__ == '__main__':
-    prepare_type = sys.argv[1]
+    prepare_type = sys.argv[1].lower()
     with open("config.json") as f:
         config = json.load(f)
     print(config)

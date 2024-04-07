@@ -25,12 +25,11 @@ split=MPI.COMM_WORLD.Split(me,key=0)
 
 ## All user-defined parameters
 supercell_size = (1,1,1)
-Force_cutoff = 12
-FC3_cutoff = 5
-displacement=0.01 #ShengBTE uses 0.01, while phono3py is using 0.03, phonopy is using 0.0212 
+Force_cutoff = config["[4_fc3]force_cutoff"] # 12
+FC3_cutoff = config["[4_fc3]fc3_cutoff"] # 5
+displacement=config["[4_fc3]displacement"] #ShengBTE uses 0.01, while phono3py is using 0.03, phonopy is using 0.0212 
 POSCAR_file='POSCAR'
 lammps_log_file=None#'test2.log'
-potential='ACE'
 NeighFile=POSCAR_file+str(FC3_cutoff)+str(Force_cutoff)+".NLC"
 
 
@@ -47,18 +46,19 @@ CHECKPOINT=0
 
 ## Initialize cell and lammps calculators, please see https://wiki.fysik.dtu.dk/ase/ase/calculators/lammps.html
 ## Suggest have lammps python API installed first on the supercomputer, see README
-atom_dict={'O':1, 'Si':2}
-if potential=='ACE':
-    cmds = makeconfig.get_potential_command(config).split('\n')
-if potential=='GAP':
-    raise Exception("unimplemented GAP!")
-    path_GAP_potential = '/home/z/zhiyan'
-    cmds = [	'pair_style quip',
-	            'pair_coeff * * %s/sio2_potential_data/potential/silica_gap.xml "Potential xml_label=GAP_2021_4_19_120_7_32_55_336" 8 14'%(path_GAP_potential)]
 
 if me == 0:
     print("Initialising LAMMPS.")
     stdout.flush()
+
+if config['material'] == 'SiO2':
+    atom_dict={'O':1, 'Si':2}
+elif config['material'] == 'Si':
+    atom_dict={'Si':1}
+else:
+    raise Exception(f"unsupported material: {config['material']}")
+
+cmds = makeconfig.get_potential_command(config).split('\n')
 
 
 lmp_test=lmp.lammps()

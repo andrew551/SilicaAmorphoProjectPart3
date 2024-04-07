@@ -33,7 +33,16 @@ del data
 
 print("Read indices are:\n",inds)
 
-print(fc2.shape)
+print(f"fc2 shape: {fc2.shape}")
+print(f"inds shape: {inds.shape}")
+
+if len(fc2.shape) == 4: # dense case
+    print("warning: converting dense matrix output to sparse and back ...")
+    fc2_sp = np.zeros((fc2.size, 5))
+    fc2_sp[:, :4] = np.array([tuple(x) for x in np.ndindex(fc2.shape)])
+    fc2_sp[:, 4] = fc2.flatten()
+fc2 = fc2_sp
+
 
 natoms=int(fc2[:,0].max())+1
 print(natoms)

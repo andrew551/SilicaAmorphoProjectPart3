@@ -1,0 +1,26 @@
+#!/bin/bash --login
+#SBATCH --nodes=1
+#SBATCH --ntasks=10
+#SBATCH --time=48:00:00
+#SBATCH --mail-type=NONE
+#SBATCH --cpus-per-task=1
+#SBATCH --mem-per-cpu=2G
+#SBATCH --partition=k2-epsrc-himem
+
+now=$(date)
+echo "start time : $now"
+source setup_script
+source $(cat VENV_PATH)
+
+mkdir 1_relax
+mkdir 1_relax/steps
+
+python3 "$AMORPHO_PATH/run_relax.py" > relax_work.out
+
+mkdir relaxed_model
+
+cp 1_relax/relaxed_structure_starting_point.POSCAR relaxed_model
+mv relaxed_model/relaxed_structure_starting_point.POSCAR relaxed_model/POSCAR
+
+now=$(date)
+echo "end time : $now"

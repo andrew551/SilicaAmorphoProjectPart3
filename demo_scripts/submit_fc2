@@ -1,0 +1,28 @@
+#!/bin/bash --login
+#SBATCH --nodes=1
+#SBATCH --ntasks=60
+#SBATCH --time=48:00:00
+#SBATCH --mail-type=NONE
+#SBATCH --cpus-per-task=1
+#SBATCH --mem-per-cpu=5G
+#SBATCH --partition=k2-epsrc-himem
+now=$(date)
+echo "start time : $now"
+source setup_script
+
+mkdir 2_fc2
+
+cp relaxed_model/POSCAR 2_fc2
+
+cd 2_fc2
+echo "start neighbour calculations"
+python3 "$AMORPHO_PATH/rap2sparse/calc_NL.py" > neighbour_work.out
+echo "start forces calculation"
+mpirun -np $SLURM_NTASKS python3 "$AMORPHO_PATH/rap2sparse/RAP2_sparse.py" > rap2_work.out
+echo "start collection"
+python3 "$AMORPHO_PATH/rap2sparse/collect_RAP2_sparse.py" > collect_work2.out
+echo "start conversion"
+python3 "$AMORPHO_PATH/rap2sparse/sparse_spRAP_convert.py"
+echo "done"
+now=$(date)
+echo "end time : $now"

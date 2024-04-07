@@ -24,9 +24,9 @@ split=MPI.COMM_WORLD.Split(me,key=0)
 FC2_cutoff = config['[fc2]_FC2_cutoff']
 Force_cutoff = config['[fc2]_Force_cutoff']
 displacement=0.0212
-POSCAR_file='relaxed_structure_starting_point.POSCAR'
+POSCAR_file='POSCAR'
 lammps_log_file=None#"test.log"
-potential='ACE'
+#potential='ACE'
 chunks=None #(24, 24, 3, 3)
 NeighFile=POSCAR_file+str(FC2_cutoff)+str(Force_cutoff)+".NL"
 
@@ -43,25 +43,31 @@ CHECKPOINT=0
 
 ## Initialize cell and lammps calculators, please see https://wiki.fysik.dtu.dk/ase/ase/calculators/lammps.html
 ## Suggest have lammps python API installed first on the supercomputer, see README
-atom_dict={'O':1, 'Si':2}
+if config['material'] == 'SiO2':
+    atom_dict={'O':1, 'Si':2}
+elif config['material'] == 'Si':
+    atom_dict={'Si':1}
+else:
+    raise Exception(f"unsupported material: {config['material']}")
 
+cmds = makeconfig.get_potential_command(config).split('\n')
+
+'''
 if potential=='ACE':
     cmds = makeconfig.get_potential_command(config).split('\n')
-    '''
     path_ACE_potential = config['path_ACE_potential']
     cmds = [    'pair_style hybrid/overlay pace table spline 6000',
                 'pair_coeff * * pace %s/SiO2-4_24-20-16-12.yace O Si'%path_ACE_potential,
                 'pair_coeff 1 1 table %s/SiO2-4_24-20-16-12_pairpot.table O_O'%path_ACE_potential,
                 'pair_coeff 1 2 table %s/SiO2-4_24-20-16-12_pairpot.table O_Si'%path_ACE_potential,
                 'pair_coeff 2 2 table %s/SiO2-4_24-20-16-12_pairpot.table Si_Si'%path_ACE_potential
-    ]
-    '''
+    ]    
 if potential=='GAP':
     raise Exception("unimplemented GAP!")
     path_GAP_potential = '/work/e89/e89/bp443/GAP'
     cmds = [	'pair_style quip',
 	            'pair_coeff * * %s/sio2_potential_data/potential/silica_gap.xml "Potential xml_label=GAP_2021_4_19_120_7_32_55_336" 8 14'%(path_GAP_potential)]
-
+'''
 
 if me == 0:
     print("Initialising LAMMPS.")

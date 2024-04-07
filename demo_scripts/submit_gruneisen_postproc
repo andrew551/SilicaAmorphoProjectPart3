@@ -1,0 +1,21 @@
+#!/bin/bash
+#SBATCH --time=0-02:30:00
+#SBATCH --job-name=grun
+#####SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --mem-per-cpu 50G
+####SBATCH --cpus-per-task=1
+#SBATCH --partition=k2-epsrc-himem
+now=$(date)
+echo "start time : $now"
+source setup_script
+cd "5_gruneisen"
+"$AMORPHO_PATH/bin/gruneisen/postproc.exe" 2 > grunpost.out    ## to calculate rmean-part
+"$AMORPHO_PATH/bin/gruneisen/postproc.exe" 1 > grunpost.out    ## to calculate rmean-part
+"$AMORPHO_PATH/bin/gruneisen/postproc.exe" 0 > grunpost.out    ## to calculate rmean-part
+"$AMORPHO_PATH/bin/gruneisen/postproc.exe" -1 > grunpost.out    ## to calculate rmean-part
+"$AMORPHO_PATH/bin/gruneisen/postproc.exe" -2 > grunpost.out    ## to calculate rmean-part
+
+cd ..
+now=$(date)
+echo "end time : $now"
