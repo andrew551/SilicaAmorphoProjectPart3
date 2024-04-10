@@ -1,0 +1,19 @@
+#!/bin/bash --login
+#SBATCH --nodes=1
+#SBATCH --ntasks=60
+#SBATCH --time=48:00:00
+#SBATCH --mail-type=NONE
+#SBATCH --cpus-per-task=1
+#SBATCH --mem-per-cpu=2G
+#SBATCH --partition=k2-epsrc-himem
+now=$(date)
+echo "start time : $now"
+source setup_script
+source $(cat VENV_PATH)
+
+mkdir 0_anneal
+
+python3 "$AMORPHO_PATH/run_anneal.py" > anneal_work.out
+
+now=$(date)
+echo "end time : $now"

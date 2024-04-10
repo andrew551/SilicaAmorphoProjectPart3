@@ -11,6 +11,8 @@ if __name__ == '__main__':
 
     #em = np.loadtxt('/mnt/scratch2/q13camb_scratch/adps2/output_folderDering5184/pydiag_output/20240330232833/eigenvectors.dat')
     em = np.loadtxt('eigenvectors.dat')
-    em = em.T # transpose to save in column-order
+    #em = em.T # transpose to save in column-order
     with open("eigenmodes.bin", 'wb') as f:
-       f.write(em.tobytes(order='F')) # write file in fortran format
+        for i in range(em.shape[0]):
+            f.write(em[:, i].tobytes()) # write eigenvectors "column by column" 
+       #f.write(em.tobytes(order='F')) # write file in fortran format

@@ -6,6 +6,7 @@ from ase.build.tools import sort
 import makeconfig
 import traceback
 import os
+from itertools import islice
 config = makeconfig.config()
 
 def get_cell_parameters(ASE_structure):
@@ -202,8 +203,34 @@ def _read_any(file_in):
         pass
         #print("Couldn't read file as lammps-datafile type")
     try:
+        x = read(file_in, format = 'extxyz') # extended xyz format (which may specifiy cell parameters (or not))
+        print(x)
+        #print(x.get_atomic_numbers())
+        print(repr(x.get_positions()))
+        print(x.get_pbc())
+        print(x.get_cell())
+        if not np.any(x.get_pbc()):
+            print('warning: input file non-periodic boundary condition detected ... checking input file again')
+            with open(file_in) as f: # this handles the case of cuboidal bcs on 2nd line (have seen DFT files in this format)
+                line2 = next(islice(f, 1, 2))
+                print(f"line2={line2}")
+                try:
+                    dims = list(map(float, line2.split()))
+                    x.set_pbc([True, True, True])
+                    x.set_cell(dims)
+                    print('read file as type extxyz (with non-standard cell specifier)')
+                    return x
+                except ValueError:
+                    pass
+            print("failed to find cell specifier in file: unsupported format")     
+        else:            
+            print('read file as type extxyz')
+            return x
+    except Exception:
+        pass
+    try:
         x = read(file_in, format = None)
-        print('read input file using unknown type guess')
+        print('read input file by guessing the format with ASE')
         return x
     
     except Exception:
@@ -292,6 +319,7 @@ if __name__ == '__main__':
     x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/output_folder_chik5001/relax_output/20240329130444/relaxed_structure_starting_point.POSCAR')
     x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/input_folder2/deringher5184/POSCAR_5184 1')
     x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/quenched6000K/1_relax/relax_output/20240403181127/steps/struct_1_relax_8.lammps_struct')
+    x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/dft_648_silica/initial_model/SiO2-pos-min.xyz')
     print('density is', get_density(x))
     '''
     input_struct_path = '/users/asmith/grun_in/models24k/Coords.dat'

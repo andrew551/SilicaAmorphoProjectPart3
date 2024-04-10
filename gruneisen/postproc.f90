@@ -19,13 +19,31 @@
       
       real*8, allocatable :: eigen(:),mass(:),rr(:),rmean(:),ww(:),dm(:),gamma1(:),allgamma(:,:),nj(:),CV(:)
  
-      character*100 path,str,factor
+      character*100 path,str,factor, path_model,path_w,path_eigen,isrmean
 	  
 	  call getarg(1,factor)
 	  read(factor,*)fc
 	  write(*,*)fc
+  
+    open(11,file='inputs',status='old')
+    read(11,*)isrmean
+    write(*,*)isrmean
+  
+    read(11,*)path_model
+    write(*,*)path_model
+    read(11,*)path_w
+    write(*,*)path_w
+    read(11,*)path_eigen
+    write(*,*)path_eigen
+     
+    close(11)
 
-      natom=648
+      open(unit=45,file=trim(path_model),status='old')
+      read(45,*)
+      read(45,*)
+      read(45,*) natom
+
+      write(*,*)natom
   
       allocate(allgamma(natom*3,2),ww(natom*3),cv(natom*3),nj(natom*3))
       
@@ -38,7 +56,7 @@
        
 !    
  
-      open(333,file='gruneisen_rr.dat',status='old')
+      open(333,file='gruneisen_MAIN.dat',status='old')
       do mj=1+3,3*natom
         read(333,*)dum,allgamma(mj,1)
       enddo

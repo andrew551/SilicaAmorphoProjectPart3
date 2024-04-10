@@ -10,15 +10,11 @@ _config = {
     'GAP_Si_label': 'GAP_2017_6_17_60_4_3_56_165',
     'path_lammps' : '/mnt/userapps/q13camb_apps/lammps/build',
     'material' : 'SiO2',
-    #'output_dir_base' : '/users/asmith/grun_out',
-    #'output_dir_base' : '/mnt/scratch2/q13camb_scratch/adps2/output_folder1',
-    #'output_dir_base' : '/mnt/scratch2/q13camb_scratch/adps2/output_folder_chik5001',
-    'output_dir_base': '/mnt/scratch2/q13camb_scratch/adps2/quenched6000K/1_relax',
-    #'path_venv': '/users/asmith/programs/kelvenv/bin/activate',
+    
+    '[1_relax]thresholds': [1e-9,1e-10,1e-11,1e-12,1e-12,1e-12,1e-13,1e-13,1e-13,1e-14,1e-14,1e-14,1e-15,1e-15, 8e-16, 5e-16, 3e-16, 1e-16],
+    '[1_relax]keep_cuboidal':True,
     '[fc2]_FC2_cutoff':12, # FC2 cutoff for FC2
     '[fc2]_Force_cutoff':12, # force cutoff for FC2 (what's the difference?)
-    'keep_cuboidal':True,
-    '[fc3_batch]n_batches': 6,
 }
 
 def is_path_like(x):
@@ -30,6 +26,12 @@ def is_path_like(x):
             return False
     return False
 
+'''
+get the full config dictionary
+combines enviromental variables, config.json file, and default parameters
+
+returns: dictionary
+'''
 def config():
     conf_copy = _config.copy()
     # convert strings to Path objects
@@ -51,6 +53,10 @@ def config():
     #print(f'DEBUG: x, y = {x}, {y}')
     return conf_copy
 
+'''
+get the lammps command to run each supported potential
+to add a new potential, simply update this function and anneal, relax, fc2, fc3 should all work
+'''
 def get_potential_command(config):
     if config['potential'] == 'ACE_Deringher':
         return f'pair_style  pace\n\
@@ -62,7 +68,6 @@ pair_coeff      1 1 table {config["path_ACE_potential_Chuck"]}/SiO2-4_24-20-16-1
 pair_coeff      1 2 table {config["path_ACE_potential_Chuck"]}/SiO2-4_24-20-16-12_pairpot.table O_Si\n\
 pair_coeff      2 2 table {config["path_ACE_potential_Chuck"]}/SiO2-4_24-20-16-12_pairpot.table Si_Si\n'
     elif config['potential'] == 'GAP_Si':
-        # 	            'pair_coeff * * %s/sio2_potential_data/potential/silica_gap.xml "Potential xml_label=GAP_2021_4_19_120_7_32_55_336" 8 14'%(path_GAP_potential)]
         return f'pair_style quip\n\
 pair_coeff * * {config["path_GAP_Si"]} \"Potential xml_label={config["GAP_Si_label"]}\" 14\n'
 

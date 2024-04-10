@@ -81,7 +81,7 @@ for i in range(len(filenames)):
 plt.xlabel(r'$T(K)$')
 plt.ylabel(r'$\gamma$')
 plt.legend()
-plt.ylim([-40,45])
+plt.ylim([-15, 20])
 fig.savefig("gruneisen_small.pdf", dpi=300, bbox_inches="tight", transparent=True)
 
 fig.savefig("gruneisen_small.png", dpi=600, bbox_inches="tight", transparent=False)
@@ -103,7 +103,7 @@ dos = np.convolve(conv, histo, mode = 'same')
 
 
 IS_gamma = read_file_table('gruneisen_IS.dat')
-rr_gamma= read_file_table('gruneisen_rr.dat')
+rr_gamma= read_file_table('gruneisen_MAIN.dat')
 pr_n = read_file_table('pr.dat')
 
 plt.clf()
@@ -132,4 +132,20 @@ axarr[1].set_title("Strain Gruneisen")
 
 
 
-plt.savefig("gamma_rr.png", dpi=600, bbox_inches="tight", transparent=False)
+plt.savefig("gamma_rr.png", dpi=200, bbox_inches="tight", transparent=False)
+
+fig, ax = plt.subplots()
+ax.set_title('FC3 Gruneisen')
+ax.set_xlabel('$\hbar\omega$ $(cm^{-1})$')
+ax.set_ylabel('$\\gamma(\\omega)$')
+ax.scatter(x, rr_gamma[:, 1], s=2, color=c_cyan_nature)
+ax.set_ylim((-20, 20))
+plt.savefig('fc3grun.png')
+
+fig, ax = plt.subplots()
+ax.set_title('IS Gruneisen')
+ax.set_xlabel('$\hbar\omega$ $(cm^{-1})$')
+ax.set_ylabel('$\\gamma(\\omega)$')
+ax.scatter(x, IS_gamma[:, 1], s=2, color=c_green_nature)
+ax.set_ylim((-20, 20))
+plt.savefig('ISgrun.png')

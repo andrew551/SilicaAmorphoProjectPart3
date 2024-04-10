@@ -15,7 +15,11 @@ cd "5_gruneisen"
 "$AMORPHO_PATH/bin/gruneisen/postproc.exe" 0 > grunpost.out    ## to calculate rmean-part
 "$AMORPHO_PATH/bin/gruneisen/postproc.exe" -1 > grunpost.out    ## to calculate rmean-part
 "$AMORPHO_PATH/bin/gruneisen/postproc.exe" -2 > grunpost.out    ## to calculate rmean-part
-
+cd ..
+mkdir pr
+python3 "$AMORPHO_PATH/gruneisen/calculate_PR.py"
+cd "5_gruneisen"
+python3 "$AMORPHO_PATH/gruneisen/plot_gruneisen.py"
 cd ..
 now=$(date)
 echo "end time : $now"

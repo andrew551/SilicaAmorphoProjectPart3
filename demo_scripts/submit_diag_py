@@ -17,6 +17,9 @@ cd ..
 
 mkdir 3_diagonalise
 cp -a 3_diagonalise_python/. 3_diagonalise/
+cd 3_diagonalise
+
+python3 "$AMORPHO_PATH/diagonalise_python/plot_DOS.py" > dosplot.out
 
 now=$(date)
 echo "end time : $now"

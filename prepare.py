@@ -10,7 +10,6 @@ if __name__ == '__main__':
     with open("config.json") as f:
         config = json.load(f)
     print(config)
-    outpath = Path(config['path_output'])
     if prepare_type == 'anneal':
         pass
     elif prepare_type == 'relax':
@@ -24,17 +23,17 @@ if __name__ == '__main__':
     elif prepare_type == 'gruneisen':
         pathd3 = Path('5_gruneisen/fc3/d3mat.dat').resolve()
         if 1:
-            if os.path.isdir("5_gruneisen"):
-                raise Exception("already exists folder gruneseisen -- delete or move the old folder first")
-            os.mkdir("5_gruneisen")
-            os.mkdir("5_gruneisen/fc3")
+            #if os.path.isdir("5_gruneisen"):
+            #    raise Exception("already exists folder gruneseisen -- delete or move the old folder first")
+            os.makedirs("5_gruneisen/fc3", exist_ok=True)
             # make xyz file
             #file_conversion.convert_and_regularize_file("relaxed_model/POSCAR", "5_gruneisen/coords.xyz", out_type="xyz")
             # convert RAP3
-            parse3d_RAP.parse3d_RAP(pathd3, 'relaxed_model/POSCAR', 'force_constants/fc3.hdf5')
+            parse3d_RAP.parse3d_RAP(pathd3, 'relaxed_model/POSCAR', '4_fc3/fc3.hdf5')
             # convert to "aaa", "aac"
             os.chdir('5_gruneisen/fc3')
-            os.system(f'{config["path_amorpho"]}/bin/gruneisen/convert_d3.exe {pathd3}')
+            print(f'{Path(__file__).parent/"bin/gruneisen/convert_d3.exe"} {pathd3}')
+            os.system(f'{Path(__file__).parent/"bin/gruneisen/convert_d3.exe"} {pathd3}')
             convert_aaa.convert() #convert aaa.dat -> bin(ind, val)
             os.chdir('..')
             os.chdir('..')

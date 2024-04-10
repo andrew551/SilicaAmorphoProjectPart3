@@ -46,6 +46,7 @@ if __name__ == '__main__':
     #thresholds = [1e-3, 1e-4, 1e-6, 1e-8, 1e-10, 1e-11,1e-12,1e-13,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-15,1e-15]
     #thresholds = [1e-10, 1e-11,1e-12,1e-13,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-14,1e-15,1e-15]
     thresholds = [1e-9,1e-10,1e-11,1e-12,1e-12,1e-12,1e-13,1e-13,1e-13,1e-14,1e-14,1e-14,1e-15,1e-15, 8e-16, 5e-16, 3e-16, 1e-16]
+    thresholds = config['[1_relax]thresholds']
     number_relaxations = len(thresholds)*2 + 1
 
     if number_relaxations % 2 == 0:
@@ -56,7 +57,7 @@ if __name__ == '__main__':
     meta_data['input_file'] = str(input_struct_path)
     meta_data['initial_density'] = file_conversion.get_density(file_conversion.read_reg(input_struct_path))
     meta_data['jobtype'] = 'relax'
-    meta_data['keep_cuboidal'] = config['keep_cuboidal']
+    meta_data['keep_cuboidal'] = config['[1_relax]keep_cuboidal']
     meta_data['thresholds'] = thresholds
     meta_data['number_relaxations'] = number_relaxations
     for k, v in meta_data.items():
