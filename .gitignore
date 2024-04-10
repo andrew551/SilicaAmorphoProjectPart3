@@ -8,3 +8,4 @@ rap2sparse/Results/*
 *.lammps
 *.dat
 *.hdf5
+*.NLC
