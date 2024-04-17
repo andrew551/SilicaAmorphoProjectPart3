@@ -241,17 +241,19 @@ def _read_any(file_in):
 def read_reg(file_in):
     return fix_atomic_numbers(_read_any(file_in))
 
-def convert_and_regularize_file(file_in, file_out, out_type='lammps', style=None):
-    x = read_reg(file_in)
+def write_file(atoms, file_out, out_type='lammps', style=None):
     if out_type == 'lammps':
-        write_LAMMPS_structure(x, file_out, style=style)
+        write_LAMMPS_structure(atoms, file_out, style=style)
     elif out_type == 'vasp':
-        write_VASP_structure(file_out, x)
+        write_VASP_structure(file_out, atoms)
     elif out_type == 'xyz':
-        write(file_out, x, format='xyz')
+        write(file_out, atoms, format='xyz')
     else:
-        raise 
-    Exception(f'unsupported output type {out_type}')
+        raise Exception(f'unsupported output type {out_type}')
+
+def convert_and_regularize_file(file_in, file_out, out_type='lammps', style=None):
+    atoms = read_reg(file_in)
+    write_file(atoms, file_out, out_type=out_type, style=style)
 
 
 

@@ -29,6 +29,8 @@ lammps_log_file=None#"test.log"
 #potential='ACE'
 chunks=None #(24, 24, 3, 3)
 NeighFile=POSCAR_file+str(FC2_cutoff)+str(Force_cutoff)+".NL"
+folder="Results"
+output_file=folder+"/fc2_%d.hdf5"%(me)
 
 
 #write out type
@@ -104,8 +106,7 @@ my_ind=np.arange(ind_start,ind_start+ind_nums)
 
 
 
-folder="Results"
-output_file=folder+"/fc2_%d.hdf5"%(me)
+
 
 #validate chunks
 if not chunks is None:

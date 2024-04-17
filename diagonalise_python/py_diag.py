@@ -14,9 +14,9 @@ def prepare_output_folder(config):
     print('output_dir:', config['output_dir'])
     os.makedirs(config['output_dir'])
 
-if __name__ == '__main__':
-    #input_file = '/mnt/scratch2/q13camb_scratch/adps2/sourecode/SilicaAmorphoProjectPart3/rap2sparse/dmat.dat'
-    input_file = str(Path('2_fc2/dmat.dat').resolve())
+
+def do_work(input_file, output_dir):
+    output_dir = Path(output_dir)
     dmat_ind = np.loadtxt(input_file)
     print(dmat_ind.shape)
     maxes = np.max(dmat_ind, axis = 0)
@@ -31,7 +31,7 @@ if __name__ == '__main__':
     dmat_ind[:, :2] -= m
     dmat[dmat_ind[:, 0].astype(int), dmat_ind[:, 1].astype(int)] = dmat_ind[:, 2]
     #prepare_output_folder(config)
-    config['output_dir'] = Path('3_diagonalise_python').resolve()
+    config['output_dir'] = output_dir
     #eigenvalues, eigenvectors = np.linalg.eigh(dmat)
     eigenvalues, eigenvectors = scipy.linalg.eigh(dmat) # eigenvalues in ascending sorted order
 
@@ -41,3 +41,9 @@ if __name__ == '__main__':
     print(f"saving to: {config['output_dir'] / 'eigenvalues.dat'}")
     np.savetxt(config['output_dir'] / 'eigenvalues.dat', eigenvalues)
     np.savetxt(config['output_dir'] / 'eigenvectors.dat', eigenvectors)
+
+if __name__ == '__main__':
+    #input_file = '/mnt/scratch2/q13camb_scratch/adps2/sourecode/SilicaAmorphoProjectPart3/rap2sparse/dmat.dat'
+    input_file = str(Path('2_fc2/dmat.dat').resolve())
+    output_dir = Path('3_diagonalise_python').resolve()
+    do_work(input_file, output_dir)

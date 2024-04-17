@@ -7,14 +7,16 @@ _config = {
     'path_ACE_potential_Chuck' : '/mnt/scratch2/q13camb_scratch/POTENTIALS/sio2/ACE/',
     'path_ACE_potential_Deringher' : '/mnt/scratch2/q13camb_scratch/adps2/ACE_POTENTIAL_SIOX/',
     'path_GAP_Si': '/mnt/scratch2/q13camb_scratch/adps2/GAP_POTENTIAL_SI/gp_iter6_sparse9k.xml',
+    'path_GAP_SiO2': '/mnt/scratch2/q13camb_scratch/POTENTIALS/sio2/GAP/sio2_potential_data/potential/silica_gap.xml',
     'GAP_Si_label': 'GAP_2017_6_17_60_4_3_56_165',
+    'GAP_SiO2_label': 'GAP_2021_4_19_120_7_32_55_336',
     'path_lammps' : '/mnt/userapps/q13camb_apps/lammps/build',
     'material' : 'SiO2',
     
-    '[1_relax]thresholds': [1e-9,1e-10,1e-11,1e-12,1e-12,1e-12,1e-13,1e-13,1e-13,1e-14,1e-14,1e-14,1e-15,1e-15, 8e-16, 5e-16, 3e-16, 1e-16],
-    '[1_relax]keep_cuboidal':True,
-    '[fc2]_FC2_cutoff':12, # FC2 cutoff for FC2
-    '[fc2]_Force_cutoff':12, # force cutoff for FC2 (what's the difference?)
+    #'[1_relax]thresholds': [1e-9,1e-10,1e-11,1e-12,1e-12,1e-12,1e-13,1e-13,1e-13,1e-14,1e-14,1e-14,1e-15,1e-15, 8e-16, 5e-16, 3e-16, 1e-16],
+    #'[1_relax]keep_cuboidal':True,
+    #'[fc2]_FC2_cutoff':12, # FC2 cutoff for FC2
+    #'[fc2]_Force_cutoff':12, # force cutoff for FC2 (what's the difference?)
 }
 
 def is_path_like(x):
@@ -44,6 +46,7 @@ def config():
     except Exception: # try parent folder
         with open('../config.json', encoding='utf-8') as f:
             conf_copy.update(json.load(f))
+    
     x = os.getenv('OMP_NUM_THREADS', '1')
     conf_copy['OMP_NUM_THREADS'] = int(x) if x else 1
     y = os.getenv('NTASKS', '1')
@@ -70,6 +73,9 @@ pair_coeff      2 2 table {config["path_ACE_potential_Chuck"]}/SiO2-4_24-20-16-1
     elif config['potential'] == 'GAP_Si':
         return f'pair_style quip\n\
 pair_coeff * * {config["path_GAP_Si"]} \"Potential xml_label={config["GAP_Si_label"]}\" 14\n'
+    elif config['potential'] == 'GAP_SiO2':
+        return f'pair_style quip\n\
+pair_coeff * * {config["path_GAP_SiO2"]} \"Potential xml_label={config["GAP_SiO2_label"]}\" 8 14\n'
 
     else:
         raise Exception(f"invalid potential name {config['potential']}")

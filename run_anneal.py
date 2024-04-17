@@ -5,7 +5,6 @@ from pathlib import Path
 
 import create_anneal_ctrl
 import makeconfig
-import create_sbatch
 import file_conversion
 import json
 nproc = 1

@@ -3,7 +3,6 @@ import datetime
 from pathlib import Path
 sys.path.insert(1, os.path.join(sys.path[0], '..')) # "hack" to add the parent directory to path
 import makeconfig
-import create_sbatch
 import file_conversion
 import json
 import create_md_ctrl
