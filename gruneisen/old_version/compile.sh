@@ -15,7 +15,8 @@ module load mpi/openmpi/4.1.1/gcc-9.3.0
 
 echo "start compile"
 gfortran -O2 -ffree-line-length-0 internal_strain.f90 -o int_strain.exe
-mpif90 -O2 -ffree-line-length-0 Gruneisen_mpi.f90 -o grun_mpi.exe
+mpif90 -O2 -ffree-line-length-0 Gruneisen_mpi_opt.f90 -o grun_mpi.exe
 gfortran -O2 -ffree-line-length-0 postproc.f90 -o postproc.exe
+gfortran -O2 -ffree-line-length-0 convert_d3.f90 -o convert_d3.exe
 
 echo "end of compilation"

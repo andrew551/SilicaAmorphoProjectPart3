@@ -35,10 +35,11 @@ def read_grun(filename):
 
 
 filenames=[f"gruneisen_T_{x}_.dat" for x in range(-2, 3)]
+prefactors = [0, -1]
+filenames=[f"gruneisen_T_{x}_.dat" for x in prefactors]
 
 
-
-labels=[str(x) for x in range(-2, 3)]
+labels=[str(x) for x in prefactors]
 Ts=[]
 gammas=[]
 
@@ -81,14 +82,24 @@ for i in range(len(filenames)):
 plt.xlabel(r'$T(K)$')
 plt.ylabel(r'$\gamma$')
 plt.legend()
-plt.ylim([-15, 20])
+plt.ylim([-5, 5])
 fig.savefig("gruneisen_small.pdf", dpi=300, bbox_inches="tight", transparent=True)
 
 fig.savefig("gruneisen_small.png", dpi=600, bbox_inches="tight", transparent=False)
 
 plt.show()
+plt.clf()
 
+plt.xlabel(r'$T(K)$')
+plt.ylabel(r'$\gamma(-1) / \gamma(0)$')
+plt.title("-1/0 ratio")
+plt.ylim([0, 3])
+plt.grid()
+plt.plot(Ts[0], gammas[1] / gammas[0])
+plt.savefig("ratio.png")
+print(gammas[1] / gammas[0])
 ev = np.loadtxt('frequencies.dat')
+
 freq = ev[:, 2]#sorted(ev)
 print(freq[:20])
 #v = np.sqrt(np.abs(ev)*9.648e27)/18.8e10
@@ -116,8 +127,8 @@ axarr[1].axhline(y=0, color='black', linestyle='--')
 axarr[0].scatter(x, rr_gamma[:, 1], s=2, color=c_cyan_nature)
 axarr[1].scatter(x, IS_gamma[:, 1], s=2, color=c_green_nature)
 
-axarr[0].set_ylim((-20, 20))
-axarr[1].set_ylim((-20, 20))
+axarr[0].set_ylim((-5, 5))
+axarr[1].set_ylim((-5, 5))
 
 axarr[2].scatter(x, pr_n[3:, 1], s=2, color=c_red)
 axarr[3].plot(xx[xx > 0], dos[xx > 0])
@@ -139,7 +150,7 @@ ax.set_title('FC3 Gruneisen')
 ax.set_xlabel('$\hbar\omega$ $(cm^{-1})$')
 ax.set_ylabel('$\\gamma(\\omega)$')
 ax.scatter(x, rr_gamma[:, 1], s=2, color=c_cyan_nature)
-ax.set_ylim((-20, 20))
+ax.set_ylim((-5, 5))
 plt.savefig('fc3grun.png')
 
 fig, ax = plt.subplots()
@@ -147,5 +158,5 @@ ax.set_title('IS Gruneisen')
 ax.set_xlabel('$\hbar\omega$ $(cm^{-1})$')
 ax.set_ylabel('$\\gamma(\\omega)$')
 ax.scatter(x, IS_gamma[:, 1], s=2, color=c_green_nature)
-ax.set_ylim((-20, 20))
+ax.set_ylim((-5, 5))
 plt.savefig('ISgrun.png')

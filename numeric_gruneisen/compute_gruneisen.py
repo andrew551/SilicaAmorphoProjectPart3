@@ -47,7 +47,7 @@ def compute_bulk_modulus(volume_strains, volume, energies):
     print(fitquad, poly)
     plt.plot(xx, poly(xx), label='quadratic fit')
     plt.legend()
-    B = volume * poly.coef[2] * eJ * 1e30 /1e9
+    B = 2 * volume * poly.coef[2] * eJ * 1e30 /1e9
     ax.set_title(f'Bulk modulus={B:.3f} GPa,  V={volume} $A^3$')
     ax.set_xlabel('$\Delta V (A^3)$')
     ax.set_ylabel('$E /eV$')
@@ -57,10 +57,10 @@ def compute_bulk_modulus(volume_strains, volume, energies):
 
 
 #return which mode in b each mode in a corresponds to
-def match_eigenmodes(a, b):
+def match_eigenmodes_old(a, b):
     if not a.shape == b.shape:
         raise ValueError("Input shape mismatch")
-    thresh = 0.9
+    thresh = 0.95
     matching = np.zeros(a.shape[0], dtype=int)
     matched = set()
     for i in range(a.shape[0] - 1, -1, -1):
@@ -77,16 +77,65 @@ def match_eigenmodes(a, b):
                 break # choose this matching quickly
         matched.add(best_j)
         matching[i] = best_j
-        #print(i, best, best_j)
+        print(i, best, best_j)
     return matching
 
-def compute_heat_capacity_per_unit_volume(T, frequencies):
-    # load cell volume from relaxed cell
-    pass
+def match_eigenmodes_full(a, b):
+    if not a.shape == b.shape:
+        raise ValueError("Input shape mismatch")
+    dot_products = np.abs(np.einsum("ki,kj->ij", a, b))
+    n = a.shape[0]
+    min_align = 0.2
+    matching = np.zeros(a.shape[0], dtype=int)
+    rem_a = set(np.arange(n))
+    rem_b = set(np.arange(n))
+    for i in range(n):
+        max_match = np.unravel_index(np.argmax(dot_products), dot_products.shape)
+        if dot_products[max_match] > min_align:
+            matching[max_match[0]] = max_match[1]
+            dot_products[max_match[0], :] = -2
+            dot_products[:, max_match[1]] = -2
+            rem_a.remove(max_match[0])
+            rem_b.remove(max_match[1])
+        else:
+            break
+    for (ai, bi) in zip(rem_a, rem_b):
+        matching[ai] = bi
+    return matching
+    
 
-def compute_compressibility():
-    # ((dp/dV)/V)^-1 from relaxed models
-    pass
+def match_eigenmodes(a, b, w=10):
+    if not a.shape == b.shape:
+        raise ValueError("Input shape mismatch")
+    
+    n = a.shape[0]
+    dot_products = np.zeros(a.shape)
+    for i in range(n):
+        l0 = max(i-w, 0)
+        l1 = min(n, i+w+1)
+        xx = np.einsum("k,kj->j", a[:, i], b[:, l0:l1])
+        dot_products[i, l0:l1] = np.abs(xx)
+    #dot_products = np.abs(np.einsum("ki,kj->ij", a, b))
+    args_sorted = np.argsort(dot_products, axis=None)
+    min_align = 0.2
+    matching = np.zeros(a.shape[0], dtype=int)
+    rem_a = set(np.arange(n))
+    rem_b = set(np.arange(n))
+    for arg in reversed(args_sorted):
+        max_match = np.unravel_index(arg, dot_products.shape)
+        #print(max_match)
+        if dot_products[max_match] < min_align:
+            break
+        if  max_match[0] in rem_a and max_match[1] in rem_b:
+            matching[max_match[0]] = max_match[1]
+            rem_a.remove(max_match[0])
+            rem_b.remove(max_match[1])
+    print('# matched easily: ' + str(n-len(rem_a)))
+    if len(rem_a) != len(rem_b):
+        raise Exception("runtime error")
+    for (ai, bi) in zip(rem_a, rem_b):
+        matching[ai] = bi
+    return matching
 
 def compute_material_gruneisen(T, frequencies, mode_gruneisen, ev):
 
@@ -130,8 +179,92 @@ def compute_material_gruneisen(T, frequencies, mode_gruneisen, ev):
           enddo
     '''
 
+def compute_all():
+    volume_strains = np.array(config["[6_numeric_gruneisen]volume_strains"])
+    print('volume strains: ', volume_strains)
+    eigenvalues_affine = []
+    #eigenmodes_affine = []
+    eigenvalues_nonaffine = []
+    #eigenmodes_nonaffine = []
+
+    reference_eigenmodes = np.loadtxt(f'6_numeric_gruneisen/affine/{get_filename(0.0)}FC2/eigenvectors.dat')
+    reference_eigenvalues = np.loadtxt(f'6_numeric_gruneisen/affine/{get_filename(0.0)}FC2/eigenvalues.dat')
+    print('matrix shape:', reference_eigenmodes.shape)
+
+    atoms_ref = file_conversion.read_reg('relaxed_model/POSCAR')
+    atoms_nonaffine_energies = []
+    volume_ref = atoms_ref.get_volume()
+    for i, vs in enumerate(volume_strains):
+        name_file = get_filename(vs)
+        print(f'processing {name_file} ...', flush=True)
+        affine_folder = f'6_numeric_gruneisen/affine/{name_file}FC2'
+        nonaffine_folder = f'6_numeric_gruneisen/nonaffine/{name_file}FC2'
+        # open eigenvalues, eigenmodes
+        # gamma_k = -1/(2*w^2) * d(w^2)/dV
+        eigenvalues_affine_vs = np.loadtxt(affine_folder+'/eigenvalues.dat')
+        next_affine_eigenmodes = np.loadtxt(affine_folder+'/eigenvectors.dat')
+        matching_affine = match_eigenmodes(reference_eigenmodes, next_affine_eigenmodes)
+        del next_affine_eigenmodes
+        eigenvalues_nonaffine_vs = np.loadtxt(nonaffine_folder+'/eigenvalues.dat')
+        next_nonaffine_eigenmodes= np.loadtxt(nonaffine_folder+'/eigenvectors.dat')
+        matching_nonaffine = match_eigenmodes(reference_eigenmodes, next_nonaffine_eigenmodes)
+        del next_nonaffine_eigenmodes
+        eigenvalues_affine.append(eigenvalues_affine_vs[matching_affine])
+        eigenvalues_nonaffine.append(eigenvalues_nonaffine_vs[matching_nonaffine])
+
+        n_relax = 18
+        #/mnt/scratch2/q13camb_scratch/adps2/work/silica_DFT192/6_numeric_gruneisen/affine/POSCAR0.997RELAX/steps/struct_0_relax_18.out
+        relax_out_file = f'6_numeric_gruneisen/affine/{name_file}RELAX/steps/struct_{i}_relax_{n_relax}.out'
+        with open(relax_out_file) as f:
+            lines = f.readlines()
+            ind = -1
+            for i, l in enumerate(lines):
+                if 'Energy initial, next-to-last, final' in l:
+                    ind = i+1
+                    break
+            atoms_nonaffine_energies.append(list(map(float, lines[ind].split()))[2]) # read energy from out file
+
+    bulk_modulus_computed = compute_bulk_modulus(volume_strains, volume_ref, atoms_nonaffine_energies)
+    data_affine = np.stack(eigenvalues_affine)
+    data_nonaffine = np.stack(eigenvalues_nonaffine)
+    print(data_affine.shape)
+    print('saving data to ', Path('6_numeric_gruneisen/affine/affine_ev_freq.dat').resolve(), flush=True)
+    np.savetxt('6_numeric_gruneisen/affine/affine_ev_freq.dat', data_affine)
+    np.savetxt('6_numeric_gruneisen/nonaffine/nonaffine_ev_freq.dat', data_nonaffine)
+
+    #   use strains -0.002 ... 0.002
+    skip_grun = 1
+    data_affine = data_affine[skip_grun:-skip_grun, :]
+    data_nonaffine = data_nonaffine[skip_grun:-skip_grun, :]
+    volume_strains = volume_strains[skip_grun:-skip_grun]
+
+    lin_coeff_affine = polynomial.polyfit(volume_strains, data_affine, 1)
+    lin_coeff_nonaffine = polynomial.polyfit(volume_strains, data_nonaffine, 1)
+
+    gamma_affine = -1/2 * 1/reference_eigenvalues * lin_coeff_affine[1, :]
+    gamma_nonaffine = -1/2 * 1/reference_eigenvalues * lin_coeff_nonaffine[1, :]
+
+    ref_freq = np.sqrt(np.abs(reference_eigenvalues)*9.648e27)/18.8e10 # frequencies in cm^-1
+    np.savetxt('6_numeric_gruneisen/affine/gamma_affine.dat', np.c_[ref_freq, gamma_affine])
+    np.savetxt('6_numeric_gruneisen/nonaffine/gamma_nonaffine.dat', np.c_[ref_freq, gamma_nonaffine])
+    T = np.arange(1, 1001)
+    grun_affine, heat_capacity = compute_material_gruneisen(T, ref_freq[3:], gamma_affine[3:], reference_eigenvalues[3:])
+    heat_capacity_vol = heat_capacity / (atoms_ref.get_volume()*1e-30)
+    specific_heat = heat_capacity_vol / (file_conversion.get_density(atoms_ref)*1e6)
+    grun_nonaffine, _ = compute_material_gruneisen(T, ref_freq[3:], gamma_nonaffine[3:], reference_eigenvalues[3:])
+    print(grun_affine)
+    print(grun_nonaffine)
+    np.savetxt('6_numeric_gruneisen/affinegrun_T.dat', np.c_[T, grun_affine])
+    np.savetxt('6_numeric_gruneisen/nonaffinegrun_T.dat', np.c_[T, grun_nonaffine])
+    np.savetxt('6_numeric_gruneisen/CV_T.dat', np.c_[T, specific_heat])
+    np.savetxt('6_numeric_gruneisen/C_per_volume_T.dat', np.c_[T, heat_capacity_vol])
+
 if __name__ == '__main__':
-    volume_strains = np.linspace(-3e-3, 3e-3, 7)
+    compute_all()
+    exit()
+
+    volume_strains = config["[6_numeric_gruneisen]volume_strains"]
+    print('volume strains: ', volume_strains)
     eigenvalues_affine = []
     eigenmodes_affine = []
     eigenvalues_nonaffine = []

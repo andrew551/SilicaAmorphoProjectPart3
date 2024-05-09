@@ -30,3 +30,12 @@ plt.xlabel('$\hbar\omega$ $(cm^{-1})$')
 plt.ylabel('DOS')
 plt.savefig('DOS_plot.png', dpi=400)
 plt.show()
+
+fig, ax = plt.subplots()
+
+sub = np.logical_and(10 < x, x < 200)
+plt.plot(x[sub], dos[sub] / x[sub]**2)
+plt.xlabel('$\hbar\omega$ $(cm^{-1})$')
+plt.ylabel('$g(\omega) / \omega^2$')
+plt.savefig('DOS_plot_over_omega_sq.png', dpi=400)
+plt.show()

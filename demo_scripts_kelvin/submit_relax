@@ -1,4 +1,5 @@
 #!/bin/bash --login
+#SBATCH --job-name=relax
 #SBATCH --nodes=1
 #SBATCH --ntasks=10
 #SBATCH --time=48:00:00

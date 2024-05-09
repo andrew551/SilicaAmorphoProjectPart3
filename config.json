@@ -1,0 +1,15 @@
+{
+    "input_struct": "/mnt/scratch2/q13camb_scratch/adps2/silicon_crys/initial_model/POSCAR",
+    "material": "SiO2",
+    "potential":"ACE_Chuck",
+    "need_anneal?":false,
+    "need_relax?":true,
+    "[1_relax]keep_cuboidal":true,
+    "[1_relax]thresholds": [1e-9,1e-10,1e-11,1e-12,1e-12,1e-12,1e-13,1e-13,1e-13,1e-14,1e-14,1e-14,1e-15,1e-15, 8e-16, 5e-16, 3e-16, 1e-16],
+    "[fc2]_FC2_cutoff":12,
+    "[fc2]_Force_cutoff":12,
+    "[4_fc3]fc3_cutoff": 5.0,
+    "[4_fc3]force_cutoff": 12.0,
+    "[4_fc3]displacement": 0.01,
+    "[6_numeric_gruneisen]volume_strains":[-3e-3, -2e-3, -1e-3, 0, 1e-3, 2e-3, 3e-3]
+}

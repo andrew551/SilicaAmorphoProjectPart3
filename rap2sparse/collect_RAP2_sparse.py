@@ -41,7 +41,7 @@ if len(fc2.shape) == 4: # dense case
     fc2_sp = np.zeros((fc2.size, 5))
     fc2_sp[:, :4] = np.array([tuple(x) for x in np.ndindex(fc2.shape)])
     fc2_sp[:, 4] = fc2.flatten()
-fc2 = fc2_sp
+    fc2 = fc2_sp
 
 
 natoms=int(fc2[:,0].max())+1

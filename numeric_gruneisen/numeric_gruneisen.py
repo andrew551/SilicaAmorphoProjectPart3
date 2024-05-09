@@ -65,7 +65,8 @@ if __name__ == '__main__':
     atoms = file_conversion.read_reg(input_file)
 
     ## apply volume strains
-    volume_strains = np.linspace(-3e-3, 3e-3, 7)
+    #volume_strains = np.linspace(-3e-3, 3e-3, 7)
+    volume_strains = config["[6_numeric_gruneisen]volume_strains"]
     original_cell = atoms.get_cell()
     for vs in volume_strains:
         scale_factor = (1+vs)**(1/3)

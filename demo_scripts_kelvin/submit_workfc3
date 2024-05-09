@@ -1,5 +1,5 @@
 #!/bin/bash --login
-
+#SBATCH --job-name=fc3
 #SBATCH --nodes=1
 #SBATCH --ntasks=128
 #SBATCH --time=48:00:00

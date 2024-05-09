@@ -1,6 +1,6 @@
 import os, sys
 import file_conversion
-from gruneisen_prepare import parse3d_RAP, convert_aaa
+from gruneisen_prepare import parse3d_RAP, convert_aaa, convertRAP3_new
 import json
 from pathlib import Path
 import shutil
@@ -22,7 +22,7 @@ if __name__ == '__main__':
         pass
     elif prepare_type == 'gruneisen':
         pathd3 = Path('5_gruneisen/fc3/d3mat.dat').resolve()
-        if 1:
+        if 0:
             #if os.path.isdir("5_gruneisen"):
             #    raise Exception("already exists folder gruneseisen -- delete or move the old folder first")
             os.makedirs("5_gruneisen/fc3", exist_ok=True)
@@ -37,13 +37,17 @@ if __name__ == '__main__':
             convert_aaa.convert() #convert aaa.dat -> bin(ind, val)
             os.chdir('..')
             os.chdir('..')
+        if 1:
+            os.makedirs("5_gruneisen/fc3", exist_ok=True)
+            convertRAP3_new.convertRAP3_new('4_fc3/fc3.hdf5', '5_gruneisen/fc3/fc3_ind.bin', '5_gruneisen/fc3/fc3_val.bin')
         # make "inputs" file
         atoms = file_conversion.read_reg("relaxed_model/POSCAR")
         natoms = len(atoms)
-        file_conversion.convert_and_regularize_file("relaxed_model/POSCAR", "5_gruneisen/coords.dat", out_type="lammps", style="charge-dummy")
+        #file_conversion.convert_and_regularize_file("relaxed_model/POSCAR", "5_gruneisen/coords.dat", out_type="lammps", style="charge-dummy")
+        file_conversion.write_file(atoms, "5_gruneisen/coords.xyz", out_type='xyz')
         with open('5_gruneisen/inputs', 'w') as f:
-            f.write("MAIN                    #  possible values IS or MAIN\n")
-            f.write(f"'{Path('5_gruneisen/coords.dat').resolve()}'     #  path to file with the structural model\n")  
+            #f.write("MAIN                    #  possible values IS or MAIN\n")
+            f.write(f"'{Path('5_gruneisen/coords.xyz').resolve()}'     #  path to file with the structural model\n")  
             f.write(f"'{Path('3_diagonalise/frequencies.dat').resolve()}'     #  path to file with eigenvalues\n")
             f.write(f"'{Path('3_diagonalise/eigenmodes.bin').resolve()}'     #  path to file with eigenvectors\n")  
             f.write(f"'{Path('5_gruneisen/fc3/').resolve()}/'     #  path to files with FC3 elements\n")
@@ -52,10 +56,13 @@ if __name__ == '__main__':
         shutil.copyfile('3_diagonalise/frequencies.dat', '5_gruneisen/frequencies.dat')
         # TODO move nlines from fc3/ to gruneisen
         # fix nlines to add back x -> 27*natoms x
+        '''
         with open('5_gruneisen/fc3/nlines') as f:
             n_fc3_lines = int(f.readlines()[0].strip().split()[0])
         with open('5_gruneisen/nlines', 'w') as f:
             f.write(f'{natoms*27} {n_fc3_lines}\n') 
+        '''
 
     else:
         raise Exception(f"bad prepare type {prepare_type}")
+    print('prepare end')

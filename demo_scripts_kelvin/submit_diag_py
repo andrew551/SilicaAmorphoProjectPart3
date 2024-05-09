@@ -1,4 +1,5 @@
 #!/bin/bash --login
+#SBATCH --job-name=diag_py
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --time=48:00:00

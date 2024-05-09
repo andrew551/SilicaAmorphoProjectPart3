@@ -52,7 +52,7 @@ def config():
     y = os.getenv('NTASKS', '1')
     conf_copy['NTASKS'] = int(y) if y else 1
     conf_copy['AMORPHO_PATH'] = os.getenv('AMORPHO_PATH', '')
-    conf_copy['path_lammps'] = os.getenv('LAMMPS_PATH', conf_copy['path_lammps']) + '/lmp'
+    conf_copy['path_lammps'] = os.getenv('LAMMPS_PATH', str(conf_copy['path_lammps'])) + '/lmp'
     #print(f'DEBUG: x, y = {x}, {y}')
     return conf_copy
 
@@ -80,3 +80,10 @@ pair_coeff * * {config["path_GAP_SiO2"]} \"Potential xml_label={config["GAP_SiO2
     else:
         raise Exception(f"invalid potential name {config['potential']}")
 
+
+def get_atom_dict(config):
+    if config['material'] == 'SiO2':
+        return {'O':1, 'Si':2}
+    elif config['material'] == 'Si':
+        return {'Si':1}
+    raise Exception(f"unsupported material: {config['material']}")

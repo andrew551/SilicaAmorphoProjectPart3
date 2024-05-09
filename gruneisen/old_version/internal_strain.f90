@@ -9,27 +9,38 @@
       character*100 path_model,path_w,path_eigen,isrmean
   
       open(11,file='inputs',status='old')
+      read(11,*)isrmean
+      write(*,*)isrmean
+  
       read(11,*)path_model
       write(*,*)path_model
       read(11,*)path_w
       write(*,*)path_w
       read(11,*)path_eigen
       write(*,*)path_eigen
+     
       close(11)
  
       open(unit=45,file=trim(path_model),status='old')
-      read(45,*) natom
       read(45,*)
+      read(45,*)
+      read(45,*) natom
    
       nmode=3*natom
  
    
       allocate(xx(nmode),xx0(nmode),emode(nmode),smode(nmode),mass(nmode))
- 
+  
+      ch=''
+      do while(trim(ch) /= 'Atoms')
+        read(45,*)ch
+      enddo
+      read(45,*)
+  
       do i=1,natom
-        read(45,*)ch,xx0(3*i-2:3*i)
-        if(trim(ch)=='O')mass(3*i-2:3*i)=dsqrt(15.9994d0)
-        if(trim(ch)=='Si')mass(3*i-2:3*i)=dsqrt(28.086d0)
+        read(45,*)j,k,dum,xx0(3*j-2:3*j)
+        if(k==1)mass(3*j-2:3*j)=dsqrt(15.9994d0)
+        if(k==2)mass(3*j-2:3*j)=dsqrt(28.086d0)
       enddo
       close(45)
 

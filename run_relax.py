@@ -80,8 +80,18 @@ if __name__ == '__main__':
     #convert_vasp_to_lammps('POSCAR_SYMMETRISED',lammps_structure_file)
 
     initial_struct_atoms = file_conversion.read_reg(input_struct_path)
+    '''
+    if '[1_relax]supercell' in config:
+        supercell = config['[1_relax]supercell']
+        print('using supercell', supercell)
+        initial_struct_atoms *= tuple(supercell)
+    else:
+        print('no supercell provided - assume [1, 1, 1]')
+    '''
     num_atoms_in_primitive_cell = len(initial_struct_atoms.get_atomic_numbers())
-    file_conversion.convert_and_regularize_file(input_struct_path, lammps_structure_file)
+    print(f'natoms total: {num_atoms_in_primitive_cell}')
+    file_conversion.write_file(initial_struct_atoms, lammps_structure_file, out_type='lammps', style=None)
+    #file_conversion.convert_and_regularize_file(input_struct_path, lammps_structure_file)
 
     
     temp_dump = config['output_dir'] / 'steps' / 'final_conf.dump'

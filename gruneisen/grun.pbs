@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --time=0-00:30:00
 #SBATCH --job-name=grun
-#####SBATCH --nodes=1
-#SBATCH --ntasks=8
+#SBATCH --nodes=1
+#SBATCH -n 1
 #SBATCH --mem-per-cpu 50G
 ####SBATCH --cpus-per-task=96
 #SBATCH --partition=k2-epsrc
@@ -12,12 +12,14 @@
 
 module purge
 module load mpi/openmpi/4.1.1/gcc-9.3.0
-gfortran -O2 -ffree-line-length-0 Calc_FC3bin_CHIK_SHIK.f90 -o calc_FC3.exe
-./calc_FC3.exe 'CHIK'
-gfortran -O2 -ffree-line-length-0 internal_strain.f90 -o int_strain.exe
-./int_strain.exe
+ 
+gfortran -O2 -ffree-line-length-0 internal_strain.f90 -o int_strain.ex
+./int_strain.ex
 
-mpif90 -O2 -ffree-line-length-0 Gruneisen_mpi_opt.f90 -o grun_mpi.exe
+mpif90 -O2 -ffree-line-length-0 Gruneisen_mpi.f90 -o grun_mpi.ex
 
-###mpirun ./grun_mpi.exe ''         ## to calculate r-part
-mpirun ./grun_mpi.exe     ## to calculate rmean-part
+mpirun ./grun_mpi.ex MAIN         ## to calculate r-part
+mpirun ./grun_mpi.ex IS       ## to calculate rmean-part
+
+gfortran -O2 -ffree-line-length-0 postproc.f90 -o postproc.ex
+./postproc.ex -1

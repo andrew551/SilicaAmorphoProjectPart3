@@ -1,0 +1,22 @@
+Overleaf document: https://www.overleaf.com/project/6596d7fd6448722baa06be1e 
+
+1) input parameters, i.e. paths to files, are specified in file 'inputs'.
+
+2) 'Calc_FC3bin_CHIK.f90' calculates FC3 matrixes for CHIK model 'Coords_5001atoms_chik_min1_4000q10.dat'of 5001 atoms.
+
+3) Use 'internal_strain.f90' code to calculate the internal strain correction term (IS). In the output 'rmean.dat': 
+   the 1st column corresponds to the atom number i;
+   the 2-4 columns correspond to xyz coordinates of the vector \overline{R}_i, see Eq.(36) or Eq.(50);
+   the 5-7 columns correspond to xyz coordinates of the position vector R_i.
+   
+4) 'Gruneisen_opt.f90' is the serial-mode code to calculate the mode-Gruneisen parameter, see Eq.(35).
+
+5) 'Gruneisen_mpi_opt.f90' is the parallel-mode code to calculate the mode-Gruneisen parameters. 
+    To launch it use 'grun.pbs' adjusted for the Kelvin2.
+	
+6) The first line in 'inputs' specifies calculation for MAIN or IS contribution to the mode Gruneisen.
+
+7) 'postproc.f90' is the code to calculate the T-dependent Gruneisen parameter by using mode-Gruneisen data;
+    Use ./postproc.exe with a input factor A={-2,-1,0,+1,+2} to manage (R+A*Rmean) contribution as follows: 
+        ./postproc.exe -2 ! This corresponds to the case \gamma(T)~(R-2*Rmean); 
+        ./postproc.exe 1  ! This corresponds to the case \gamma(T)~(R+Rmean) (i.e. as in A&F PRL 1997).

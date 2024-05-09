@@ -1,4 +1,5 @@
 import numpy as np
+from ase import Atoms
 from ase.io import read, write
 from collections import Counter
 import numpy as np
@@ -142,7 +143,7 @@ def fix_atomic_numbers(x):
     numbers = list(counts.keys())
     if config['material'] == 'SiO2':
         if not len(numbers) == 2:
-            raise Exception(f"ERROR: expected structure with 2 types of atom, got {list(numbers)}")
+            raise Exception(f"ERROR: expected structure with 2 types of atom, got {str(numbers)}")
         
         # assign whichever atom type is more frequent to be oxygen, and the other Si
         if counts[numbers[0]] > counts[numbers[1]]:
@@ -160,6 +161,46 @@ def fix_atomic_numbers(x):
     x.set_atomic_numbers(new_types)
     x = sort(x, tags=x.get_atomic_numbers())
     return x
+
+def read_paratec(file_in):
+    state = 'seek'
+    atom_type = None
+    coords = {}
+    with open(file_in) as f:
+        vectors = []
+        for line in f:
+            tokens = line.split()
+            #print(tokens)
+            if not tokens:
+                continue
+            if tokens[0] == 'coord':
+                vectors.append(list(map(float, tokens[1:])))
+            if tokens[0] == 'newtype':
+                if not atom_type is None:
+                    coords[atom_type] = np.array(vectors)
+                    vectors.clear()
+                atom_type = tokens[1]
+            if len(tokens) == 2 and tokens[0] == 'begin' and tokens[1] == 'latticevecs':
+                state = 'lattice_vecs'
+            if len(tokens) == 2 and tokens[0] == 'begin' and tokens[1] == 'coordinates':
+                state = 'coordinates'
+            if len(tokens) == 2 and tokens[0] == 'end' and tokens[1] == 'latticevecs':
+                if not state == 'lattice_vecs':
+                    raise Exception("parse error on line:" + line)
+                lattice_cell = np.array(vectors) * 0.529177 # conversion from Bohr radii to Angstrom
+                vectors.clear()
+            if len(tokens) == 2 and tokens[0] == 'end' and tokens[1] == 'coordinates':
+                if not state == 'coordinates':
+                    raise Exception("parse error on line:" + line)
+                coords[atom_type] = np.array(vectors)
+                vectors.clear()
+                state = 'end'
+        if not state == 'end':
+            raise Exception("unexpected eof")
+    atoms = Atoms(''.join([sym+str(atoms_sym.shape[0]) for sym, atoms_sym in coords.items()]), positions = np.concatenate(list(coords.values())), cell = lattice_cell, pbc=[1, 1, 1])         
+    atoms.set_scaled_positions(np.concatenate(list(coords.values())))
+    return atoms
+
 '''
 x -> x_standardised
 this function reads the files in the format 
@@ -226,6 +267,12 @@ def _read_any(file_in):
         else:            
             print('read file as type extxyz')
             return x
+    except Exception:
+        pass
+    try:
+        x = read_paratec(file_in)
+        print('read file in paratec format')
+        return x
     except Exception:
         pass
     try:
@@ -322,6 +369,7 @@ if __name__ == '__main__':
     x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/input_folder2/deringher5184/POSCAR_5184 1')
     x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/quenched6000K/1_relax/relax_output/20240403181127/steps/struct_1_relax_8.lammps_struct')
     x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/dft_648_silica/initial_model/SiO2-pos-min.xyz')
+    x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/dft_648_silica_v2/relaxed_model/POSCAR')
     print('density is', get_density(x))
     '''
     input_struct_path = '/users/asmith/grun_in/models24k/Coords.dat'

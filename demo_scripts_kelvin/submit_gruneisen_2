@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --time=0-01:30:00
-#SBATCH --job-name=grun
+#SBATCH --job-name=grun2
 #####SBATCH --nodes=1
 #SBATCH --ntasks=8
 #SBATCH --mem-per-cpu 50G
@@ -15,12 +15,10 @@ python3 "$AMORPHO_PATH/prepare.py" GRUNEISEN
 cd "5_gruneisen"
 "$AMORPHO_PATH/bin/gruneisen/int_strain.exe" > grunint_out.out
 echo "did pre-calculation for IS"
-sed -i "1s/.*/IS/" inputs
-mpirun "$AMORPHO_PATH/bin/gruneisen/grun_mpi.exe" > grungrun2_IS.out    ## to calculate rmean-part
-echo "did IS"
-sed -i "1s/.*/MAIN/" inputs
-mpirun "$AMORPHO_PATH/bin/gruneisen/grun_mpi.exe" > grungrun2_MAIN.out    ## to calculate rmean-part
+mpirun "$AMORPHO_PATH/bin/gruneisen/grun_mpi.exe" MAIN > grungrun2_IS.out    ## to calculate rmean-part
 echo "did MAIN"
+mpirun "$AMORPHO_PATH/bin/gruneisen/grun_mpi.exe" IS > grungrun2_MAIN.out    ## to calculate rmean-part
+echo "did IS"
 
 cd ..
 now=$(date)
