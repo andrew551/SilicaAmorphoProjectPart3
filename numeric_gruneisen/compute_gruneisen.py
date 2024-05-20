@@ -11,7 +11,12 @@ import file_conversion
 import json
 import datetime
 import create_relax_ctrl
-from numeric_gruneisen import get_filename
+try:
+    from numeric_gruneisen.numeric_gruneisen import get_filename
+    import numeric_gruneisen.bulk_modulus
+except Exception:
+    from numeric_gruneisen import get_filename
+    import bulk_modulus
 import shutil
 from numpy.polynomial import polynomial
 import matplotlib.pyplot as plt
@@ -36,25 +41,6 @@ dark_red='#9e0b00'
 c_green_nature='#63cf8c'#np.array([96./255., 172./255., 63./255.,1.0])
 c_blue_nature=np.array([54./255., 79./255., 156./255.,1.0])
 ec=[c_blue_nature,c_green_nature,c_red, 'yellow', 'purple']
-
-
-def compute_bulk_modulus(volume_strains, volume, energies):
-    fig, ax = plt.subplots()
-    ax.scatter(volume_strains * volume, energies, s=20, color=c_green_nature, label='numeric data')
-    fitquad = polynomial.polyfit(volume_strains * volume, energies, 2)
-    xx = np.linspace(np.min(volume_strains * volume), np.max(volume_strains * volume))
-    poly = polynomial.Polynomial(fitquad)
-    print(fitquad, poly)
-    plt.plot(xx, poly(xx), label='quadratic fit')
-    plt.legend()
-    B = 2 * volume * poly.coef[2] * eJ * 1e30 /1e9
-    ax.set_title(f'Bulk modulus={B:.3f} GPa,  V={volume} $A^3$')
-    ax.set_xlabel('$\Delta V (A^3)$')
-    ax.set_ylabel('$E /eV$')
-    plt.grid()
-    plt.savefig('6_numeric_gruneisen/bulk_modulus.png', dpi=600, bbox_inches="tight")
-    return B
-
 
 #return which mode in b each mode in a corresponds to
 def match_eigenmodes_old(a, b):
@@ -180,6 +166,7 @@ def compute_material_gruneisen(T, frequencies, mode_gruneisen, ev):
     '''
 
 def compute_all():
+    atoms_ref = file_conversion.read_reg('relaxed_model/POSCAR')
     volume_strains = np.array(config["[6_numeric_gruneisen]volume_strains"])
     print('volume strains: ', volume_strains)
     eigenvalues_affine = []
@@ -187,13 +174,12 @@ def compute_all():
     eigenvalues_nonaffine = []
     #eigenmodes_nonaffine = []
 
+
     reference_eigenmodes = np.loadtxt(f'6_numeric_gruneisen/affine/{get_filename(0.0)}FC2/eigenvectors.dat')
     reference_eigenvalues = np.loadtxt(f'6_numeric_gruneisen/affine/{get_filename(0.0)}FC2/eigenvalues.dat')
     print('matrix shape:', reference_eigenmodes.shape)
 
-    atoms_ref = file_conversion.read_reg('relaxed_model/POSCAR')
-    atoms_nonaffine_energies = []
-    volume_ref = atoms_ref.get_volume()
+    
     for i, vs in enumerate(volume_strains):
         name_file = get_filename(vs)
         print(f'processing {name_file} ...', flush=True)
@@ -212,19 +198,9 @@ def compute_all():
         eigenvalues_affine.append(eigenvalues_affine_vs[matching_affine])
         eigenvalues_nonaffine.append(eigenvalues_nonaffine_vs[matching_nonaffine])
 
-        n_relax = 18
-        #/mnt/scratch2/q13camb_scratch/adps2/work/silica_DFT192/6_numeric_gruneisen/affine/POSCAR0.997RELAX/steps/struct_0_relax_18.out
-        relax_out_file = f'6_numeric_gruneisen/affine/{name_file}RELAX/steps/struct_{i}_relax_{n_relax}.out'
-        with open(relax_out_file) as f:
-            lines = f.readlines()
-            ind = -1
-            for i, l in enumerate(lines):
-                if 'Energy initial, next-to-last, final' in l:
-                    ind = i+1
-                    break
-            atoms_nonaffine_energies.append(list(map(float, lines[ind].split()))[2]) # read energy from out file
 
-    bulk_modulus_computed = compute_bulk_modulus(volume_strains, volume_ref, atoms_nonaffine_energies)
+    bulk_modulus_computed = bulk_modulus.compute_bulk_modulus()
+    print("computed bulk modulus:", bulk_modulus_computed)
     data_affine = np.stack(eigenvalues_affine)
     data_nonaffine = np.stack(eigenvalues_nonaffine)
     print(data_affine.shape)

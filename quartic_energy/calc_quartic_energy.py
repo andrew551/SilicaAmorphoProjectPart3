@@ -22,7 +22,7 @@ atoms = file_conversion.read_reg('relaxed_model/POSCAR')
 
 
 
-displacement = 0.05
+displacement = 0.5
 
 
 cmds = makeconfig.get_potential_command(config).split('\n')
@@ -38,13 +38,16 @@ print(me, nprocs, flush=True)
 if me == 0:
     eigenvectors = np.loadtxt('3_diagonalise/eigenvectors.dat').T
     n = eigenvectors.shape[0]
-    ev3 = eigenvectors.reshape((n, n//3, 3))
+    ev3_0 = eigenvectors.reshape((n, n//3, 3))
     print(eigenvectors[0, :10])
     print(eigenvectors[100, :10])
+    print(atoms.get_masses())
+    invsqrtmasses = atoms.get_masses() ** -0.5
+    ev3 = np.einsum('ijk, j -> ijk', ev3_0, invsqrtmasses)
     print(ev3[0, :10, :])
     print(ev3[1000, :10, :])
     print('read eigenvectors of shape', eigenvectors.shape, flush=True)
-
+    print('max dyn. eigenvector element:', np.max(ev3, axis=None))
 else:
     eigenvectors = None
     ev3 = None
@@ -98,7 +101,7 @@ def compute_element_single(i, k):
 u0 = compute_u0()
 compute_element(5, 5, 0, 0)
 
-n=64
+#n=10
 
 
 #elements = np.zeros(n, n, 2, 2)
@@ -144,7 +147,8 @@ elements2 = np.ndarray(buffer=buf2, dtype='d', shape=shape_out2)
 
 ######
 
-
+#offset = 15000
+offset = 0
 if __name__ == '__main__':
     for i in range(n):
         if not i % nprocs == me:
@@ -155,9 +159,9 @@ if __name__ == '__main__':
             #if not j 
             for k in range(2):
                 for l in range(2):
-                    elements[i, j, k, l] = compute_element(i, j, k, l)
+                    elements[i, j, k, l] = compute_element(i+offset, j+offset, k, l)
         for k in range(2):
-            elements2[i, k] = compute_element_single(i, k)
+            elements2[i, k] = compute_element_single(i+offset, k)
 MPI.COMM_WORLD.Barrier()
 
 def restart_lammps(LAMMPSLibObject):

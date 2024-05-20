@@ -10,6 +10,11 @@ _config = {
     'path_GAP_SiO2': '/mnt/scratch2/q13camb_scratch/POTENTIALS/sio2/GAP/sio2_potential_data/potential/silica_gap.xml',
     'GAP_Si_label': 'GAP_2017_6_17_60_4_3_56_165',
     'GAP_SiO2_label': 'GAP_2021_4_19_120_7_32_55_336',
+    'path_ACE_cheap_CHUCK_1' : '/mnt/scratch2/q13camb_scratch/adps2/ACE_NEW_CHUCK/1',
+    'path_ACE_cheap_CHUCK_2' : '/mnt/scratch2/q13camb_scratch/adps2/ACE_NEW_CHUCK/2',
+    'path_ACE_cheap_CHUCK_3' : '/mnt/scratch2/q13camb_scratch/adps2/ACE_NEW_CHUCK/3',
+    'path_ACE_cheap_CHUCK_4' : '/mnt/scratch2/q13camb_scratch/adps2/ACE_NEW_CHUCK/4',
+
     'path_lammps' : '/mnt/userapps/q13camb_apps/lammps/build',
     'material' : 'SiO2',
     
@@ -76,6 +81,34 @@ pair_coeff * * {config["path_GAP_Si"]} \"Potential xml_label={config["GAP_Si_lab
     elif config['potential'] == 'GAP_SiO2':
         return f'pair_style quip\n\
 pair_coeff * * {config["path_GAP_SiO2"]} \"Potential xml_label={config["GAP_SiO2_label"]}\" 8 14\n'
+
+    elif config['potential'] == 'ACE_CHEAP_CHUCK_1':
+        return f'pair_style      hybrid/overlay pace table spline 6000\n\
+pair_coeff      * * pace {config["path_ACE_cheap_CHUCK_1"]}/SiO2-3-12.yace O Si\n\
+pair_coeff      1 1 table {config["path_ACE_cheap_CHUCK_1"]}/SiO2-3-12_pairpot.table O_O \n\
+pair_coeff      1 2 table {config["path_ACE_cheap_CHUCK_1"]}/SiO2-3-12_pairpot.table O_Si\n\
+pair_coeff      2 2 table {config["path_ACE_cheap_CHUCK_1"]}/SiO2-3-12_pairpot.table Si_Si\n' 
+    
+    elif config['potential'] == 'ACE_CHEAP_CHUCK_2':
+        return f'pair_style      hybrid/overlay pace table spline 6000\n\
+pair_coeff      * * pace {config["path_ACE_cheap_CHUCK_2"]}/SiO2-3-18.yace O Si\n\
+pair_coeff      1 1 table {config["path_ACE_cheap_CHUCK_2"]}/SiO2-3-18_pairpot.table O_O \n\
+pair_coeff      1 2 table {config["path_ACE_cheap_CHUCK_2"]}/SiO2-3-18_pairpot.table O_Si\n\
+pair_coeff      2 2 table {config["path_ACE_cheap_CHUCK_2"]}/SiO2-3-18_pairpot.table Si_Si\n' 
+
+    elif config['potential'] == 'ACE_CHEAP_CHUCK_3':
+        return f'pair_style      hybrid/overlay pace table spline 6000\n\
+pair_coeff      * * pace {config["path_ACE_cheap_CHUCK_3"]}/SiO2-4-12.yace O Si\n\
+pair_coeff      1 1 table {config["path_ACE_cheap_CHUCK_3"]}/SiO2-4-12_pairpot.table O_O \n\
+pair_coeff      1 2 table {config["path_ACE_cheap_CHUCK_3"]}/SiO2-4-12_pairpot.table O_Si\n\
+pair_coeff      2 2 table {config["path_ACE_cheap_CHUCK_3"]}/SiO2-4-12_pairpot.table Si_Si\n' 
+
+    elif config['potential'] == 'ACE_CHEAP_CHUCK_4':
+        return f'pair_style      hybrid/overlay pace table spline 6000\n\
+pair_coeff      * * pace {config["path_ACE_cheap_CHUCK_4"]}/SiO2-4_24-20-16-12.yace O Si\n\
+pair_coeff      1 1 table {config["path_ACE_cheap_CHUCK_4"]}/SiO2-4_24-20-16-12_pairpot.table O_O \n\
+pair_coeff      1 2 table {config["path_ACE_cheap_CHUCK_4"]}/SiO2-4_24-20-16-12_pairpot.table O_Si\n\
+pair_coeff      2 2 table {config["path_ACE_cheap_CHUCK_4"]}/SiO2-4_24-20-16-12_pairpot.table Si_Si\n' 
 
     else:
         raise Exception(f"invalid potential name {config['potential']}")

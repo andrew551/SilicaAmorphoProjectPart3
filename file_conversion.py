@@ -354,8 +354,10 @@ def get_density(x):
     v = x.get_volume()
     num_ox = len([n for n in x.get_atomic_numbers() if n == 8])
     num_si = len([n for n in x.get_atomic_numbers() if n == 14])
-    m = num_ox*16 + num_si*28.0855
+    m = num_ox*15.999 + num_si*28.0855
     return m/v/6.022e23*10e23 # Avogadros constant
+
+
 '''
 test conversion function
 '''
@@ -369,7 +371,7 @@ if __name__ == '__main__':
     x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/input_folder2/deringher5184/POSCAR_5184 1')
     x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/quenched6000K/1_relax/relax_output/20240403181127/steps/struct_1_relax_8.lammps_struct')
     x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/dft_648_silica/initial_model/SiO2-pos-min.xyz')
-    x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/dft_648_silica_v2/relaxed_model/POSCAR')
+    #x = read_reg('/mnt/scratch2/q13camb_scratch/adps2/dft_648_silica_v2/relaxed_model/POSCAR')
     print('density is', get_density(x))
     '''
     input_struct_path = '/users/asmith/grun_in/models24k/Coords.dat'

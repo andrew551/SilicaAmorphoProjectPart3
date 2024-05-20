@@ -12,7 +12,7 @@ n = elements.shape[0]
 
 pet = np.zeros((n, n))
 
-displacement = 0.01
+displacement = 0.5
 
 for i in range(n):
     for j in range(n):
@@ -23,13 +23,13 @@ for i in range(n):
 
 for i in range(n):
     for j in range(n):
-        pet[i, j] = (elements[i, j, 0, 0] - 2 * elements_single[j, 0] + elements[i, j, 1, 0] - 2 * elements_single[i, 0] + 4 * u0 - 2 * elements_single[i, 1] + elements[i, j, 0, 1] - 2 * elements_single[j, 1] + elements[i, j, 1, 1])/16/displacement**4
+        pet[i, j] = (elements[i, j, 0, 0] - 2 * elements_single[j, 0] + elements[i, j, 1, 0] - 2 * elements_single[i, 0] + 4 * u0 - 2 * elements_single[i, 1] + elements[i, j, 0, 1] - 2 * elements_single[j, 1] + elements[i, j, 1, 1])/displacement**4
 
 print(pet)
 np.savetxt('10_quartic/pet.dat', pet)
 
 ## compute diagonal 2nd derivatives (check eigenvalues consistent)
-
+## yes, these are okay (roughly)
 evs = np.zeros(n)
 for i in range(n):
     evs[i] = (elements_single[i, 0] - 2*u0 + elements_single[i, 1]) / displacement**2
