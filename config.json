@@ -1,7 +1,7 @@
 {
     "input_struct": "/mnt/scratch2/q13camb_scratch/adps2/silicon_crys/initial_model/POSCAR",
     "material": "SiO2",
-    "potential":"ACE_Chuck",
+    "potential":"ACE_Deringher",
     "need_anneal?":false,
     "need_relax?":true,
     "[1_relax]keep_cuboidal":true,
