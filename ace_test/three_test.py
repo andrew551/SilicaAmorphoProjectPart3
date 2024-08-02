@@ -20,8 +20,8 @@ import matplotlib.pyplot as plt
 #atoms = file_conversion.read_reg('relaxed_model/POSCAR')
 #igenvectors = np.loadtxt('3_diagonalise/eigenvectors.dat')
 
-
-p0 = np.array([[1, 0, 0], [-0.5, np.sqrt(3)/2, 0], [-0.5, -np.sqrt(3)/2, 0]])
+config['ZBL_flag'] = True
+p0 = np.array([[10, 0, 0], [-0.5, np.sqrt(3)/2, 0], [-0.5, -np.sqrt(3)/2, 0]])
 atoms = Atoms('Si3', positions=p0, cell=[50,50,50], pbc=[1, 1, 1])
 
 file_conversion.write_file(atoms, 'temp_test_atoms.vasp', out_type='vasp')
@@ -68,8 +68,8 @@ if __name__ == '__main__':
     plt.legend()
     plt.ylabel("u / eV")
     plt.xlabel("r / Angstroms")
-    plt.title(f"ACE three-body test -- {config['potential']}")
-    plt.savefig("SiSi_threebody.png", dpi=400)
+    plt.title(f"ACE three-body test zbl-- {config['potential']}")
+    plt.savefig("SiSi_threebody10rzbl.png", dpi=400)
     plt.clf()
     for specie in species:
         atoms.set_chemical_symbols(specie)
@@ -80,8 +80,8 @@ if __name__ == '__main__':
     plt.loglog()
     plt.ylabel("u / eV")
     plt.xlabel("r / Angstroms")
-    plt.title(f"ACE two-body test close-- {config['potential']}")
-    plt.savefig("twothreebody_close.png", dpi=400)
+    plt.title(f"ACE two-body test close zbl-- {config['potential']}")
+    plt.savefig("twothreebody_10rclosezbl.png", dpi=400)
 
 MPI.COMM_WORLD.Barrier()
 

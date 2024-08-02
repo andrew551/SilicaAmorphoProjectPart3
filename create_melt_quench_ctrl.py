@@ -23,6 +23,7 @@ def create_melt_quench_ctrl(regularised_input_path, config):
     command += f"dump myDump all custom 1 {output_dir}/annealing_temp.dump id type x y z vx vy vz\n"
     command += "dump_modify myDump format line \"%d %d %10.8e %10.8e %10.8e %10.8e %10.8e %10.8e\"\n"
     command += "\n"
+    #command += "velocity all create 6000 4928459 rot yes dist gaussian\n"
     command += "timestep        0.0005\n"
     command += "thermo          10\n"
     command += "thermo_style    custom  step density temp press ke pe etotal\n"
@@ -33,8 +34,14 @@ def create_melt_quench_ctrl(regularised_input_path, config):
     command += "                               #Tstart Tstop Tdamp\n"
     command += "                               #Tdamp must be 100 timesteps, see https://docs.lammps.org/fix_nh.html\n"
     #command += "dump h5md1 all xyz 100 dumps/dump_xyz position velocity"
-    command += "fix             F1 all npt temp 6000.0 6000.0 $(100.0*dt) iso 0.0 0.0 10.0\n"
-    command += "run             20000\n"
+    command += 'fix    npt1 all npt temp 300 3000 $(100.0*dt) iso 0.001 0.001 10\n'
+    command += 'run 8000\n'
+    command += 'fix    npt1 all npt temp 3000 3000 $(100.0*dt) aniso 0.001 0.001 10\n'
+    command += 'run 200000\n'
+    command += f"write_data      {output_dir}/1_randomisedxx.dat\n"
+    '''
+    command += "fix             F1 all npt temp 300.0 4000.0 $(100.0*dt) iso 0.0 0.0 10.0\n"
+    command += "run             8000\n"
     command += "unfix           F1\n"
     command += f"write_data      {output_dir}/1_randomised.dat\n"
     command += "\n"
@@ -88,5 +95,5 @@ def create_melt_quench_ctrl(regularised_input_path, config):
     command += "run             20000\n"
     command += "unfix           F11\n"
     command += f"write_data      {output_dir}/11_amorphous.dat\n"
-
+    '''
     return command

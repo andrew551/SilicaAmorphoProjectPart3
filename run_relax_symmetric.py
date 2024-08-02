@@ -104,6 +104,9 @@ def run_joint_relax(atoms,calculator,fmax=1e-4,allow_tilt=False,Optimizer=BFGS,a
         print("\nSYMMETRY IS NOT KEPT AFTER RELAXATION, USING SYMMETRYIC STRUCTURE\n")
  
     atoms_write=Atoms(symbols=atoms.symbols,positions=atoms.positions,cell=atoms.cell,pbc=atoms.pbc)
+    spc = config['[1b_relax_sym]supercell_result']
+    write("1b_relax_sym/POSCAR_relaxed_unitcell",atoms_write,format='vasp')
+    atoms_write = atoms_write * spc
     write("1b_relax_sym/POSCAR_relaxed",atoms_write,format='vasp')
     return atoms
 
